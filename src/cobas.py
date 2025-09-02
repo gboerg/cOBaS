@@ -27,9 +27,7 @@ class App(customtkinter.CTk):
         self.frame1 = MyFrame(master=self, label_text="cOBaS | OBS WebSocket 5.0 Manager", width=600, height=400, fg_color="purple")
         self.frame1.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
         
-        # NOTE: Pass 'self.button_callback' as a method reference
-        self.button = customtkinter.CTkButton(self.frame1, text="Connect to OBS", command=self.button_callback)
-        self.button.grid(row=3, column=0, padx=10, pady=10, sticky="ew")
+
 
         # Zweiter Frame, der als Container dient
         self.frame2 = customtkinter.CTkFrame(master=self, width=500, height=200, fg_color="green")
@@ -71,8 +69,16 @@ class App(customtkinter.CTk):
         self.sub_frame2 = customtkinter.CTkFrame(master=self.frame2, fg_color="red")
         self.sub_frame2.grid(row=1, column=0, sticky="nsew")
 
-    # NOTE: The method must take 'self' as an argument
-    
+        # NOTE: The method must take 'self' as an argument
+        self.button = customtkinter.CTkButton(self.sub_frame, text="Connect to OBS", command=self.button_callback)
+        self.button.grid(row=0, column=10, padx=10, pady=10, sticky="w")
+
+
+
+        # NOTE: The method must take 'self' as an argument
+        self.button = customtkinter.CTkButton(self.frame2, text="RUN", command=self.button_callback)
+        self.button.grid(row=3, padx=10, pady=10, sticky="e")
+
     def button_callback(self):
         print("button clicked")
         

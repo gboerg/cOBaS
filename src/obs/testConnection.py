@@ -3,21 +3,16 @@ import logging as l
 import obsws_python as obs
 from obsws_python.error import OBSSDKRequestError, OBSSDKError
 
-def testConnection(host: str, port: str, password: str):
+def testConnection(host: str, port: int, password: str):
     """
     Tests the connection to OBS synchronously. This function will block.
     Returns a tuple (success, message).
     """
     l.info("Attempting to connect to OBS at %s:%s", host, port)
-    
-    try:
-        int_port = int(port)
-    except ValueError:
-        return False, "Invalid port number. Port must be an integer."
 
     try:
         # Erstellt den WebSocket-Client
-        cl = obs.ReqClient(host=host, port=int_port, password=password, timeout=3)
+        cl = obs.ReqClient(host=host, port=port, password=password, timeout=3)
         l.info("Successfully identified ReqClient with the server.")
         
         # Ruft die Versionsinformationen ab
