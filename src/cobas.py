@@ -1,31 +1,69 @@
 import customtkinter
 import customtkinter as ctk
 import logging as l
+import asyncio
 from obs.testConnection import testConnection
+from obs.toggleRecording import toggleRecording
+from database import database
+import sys
+import os
+
+# Add the parent directory to the Python path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # from src.obs.testConnection import testConnection as tc
-
 l.basicConfig(level=l.INFO)
+# counter = 0
+
+cursor = database.cursor
+conn = database.conn
+# def on_interaction():
+#     global counter
+#     counter += 1
+
+#     if counter == 0:
+#         return False
+#     elif counter == 1:
+#         return True
+#     elif counter == 2:
+#         counter = 0
+#         return False
+
+# def get_interaction():
+#     l.info(f"Current counter level  {counter}")
+#     return counter
 
 class MyFrame(customtkinter.CTkFrame):
     def __init__(self, master, label_text, **kwargs):
         super().__init__(master, **kwargs)
-
+        
         self.label = customtkinter.CTkLabel(self, text=label_text)
         self.label.grid(row=0, column=0)
 
 
 class App(customtkinter.CTk):
+
     def __init__(self):
         super().__init__()
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS state (
+                id INTEGER Primary Key ,
+                record BOOL,
+                stream BOOL)
+
+        """)
         self.geometry("1650x850")
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=0)
         self.grid_columnconfigure(1, weight=1)
 
         # Erster Frame
-        self.frame1 = MyFrame(master=self, label_text="cOBaS | OBS WebSocket 5.0 Manager", width=600, height=400, fg_color="purple")
+        self.frame1 = MyFrame(master=self, label_text="", width=600, height=400, fg_color="purple")
         self.frame1.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
+        self.frame1_subframe = ctk.CTkFrame(master=self.frame1, fg_color="grey")
+        self.frame1_subframe.grid(row=0, column=0, sticky="n")
+        self.appname = ctk.CTkLabel(master=self.frame1_subframe, text="cOBaS\nOBS WebSocket 5.0\nManager",)
+        self.appname.grid(row=0, column=0, padx=10, pady=10)
         
 
 
@@ -49,7 +87,7 @@ class App(customtkinter.CTk):
 
         self.host = customtkinter.CTkLabel(master=self.sub_frame, text="HOST:")
         self.host.grid(row=0, column=0, padx=10, pady=10)
-        self.host_entry = customtkinter.CTkEntry(master=self.sub_frame, placeholder_text="IP-Adress of Computer")
+        self.host_entry = customtkinter.CTkEntry(master=self.sub_frame, placeholder_text="IP-Adress of target PC")
         self.host_entry.grid(row=0, column=1, padx=10, pady=10)
 
         self.port = customtkinter.CTkLabel(master=self.sub_frame, text="WebSocket Port:")
@@ -69,33 +107,116 @@ class App(customtkinter.CTk):
         self.sub_frame2 = customtkinter.CTkFrame(master=self.frame2, fg_color="red")
         self.sub_frame2.grid(row=1, column=0, sticky="nsew")
 
+        self.sub_frame2_button1 = ctk.CTkCheckBox(self.sub_frame2, text="Toggle Recording", command= lambda: self.toAsync(kwargs="toggle_rec"), bg_color="black")
+        self.sub_frame2_button1.grid(row=0, column= 1, padx=10, pady=10)
+
+
         # NOTE: The method must take 'self' as an argument
-        self.button = customtkinter.CTkButton(self.sub_frame, text="Connect to OBS", command=self.button_callback)
+        self.button = customtkinter.CTkButton(self.sub_frame, text="Connect to OBS", command=lambda: self.toAsync(kwargs="obs_connect"))
         self.button.grid(row=0, column=10, padx=10, pady=10, sticky="w")
 
 
 
         # NOTE: The method must take 'self' as an argument
-        self.button = customtkinter.CTkButton(self.frame2, text="RUN", command=self.button_callback)
-        self.button.grid(row=3, padx=10, pady=10, sticky="e")
+        self.button2 = customtkinter.CTkButton(self.frame2, text="RUN", command=lambda: self.toAsync(kwargs="run_all_selected"))
+        self.button2.grid(row=3, padx=10, pady=10, sticky="e")
 
-    def button_callback(self):
-        print("button clicked")
-        
+
+    def toAsync(self, kwargs):
+        if kwargs == "run_all_selected":
+            l.info("run current selected")
+
+        if kwargs == ("obs_connect"):
+            l.info("Obs Connect Button")
+            asyncio.run(self.obsConnect())
+
+        if kwargs == "toggle_rec":
+            asyncio.run(self.toggle_rec())
+            l.info("toggle_rec")
+
+    async def obsConnect(self):
         # NOTE: Retrieve the value here when the button is clicked
         host = self.host_entry.get()
         port = self.port_entry.get()
         passw = self.password_entry.get()
         l.info(f"Password entry values: {host}, {port}, {passw}")
         self.button.configure(state="disabled", text="Connecting...")
-        test_result, message = testConnection(host, port, passw)
+        test_result, message = await testConnection(host, port, passw)
 
         l.info(f"Test Result during conn: {test_result}")
 
         if test_result: 
             self.button.configure(state="enabled", text="Verbunden")
+
+        elif test_result == False: 
+            self.button.configure(state="enabled", text="No entry")
         else: self.button.configure(state="enabled", text=f"Fehlgeschlagen: {message}")
 
+
+        return test_result
+
+    async def toggle_rec(self):
+        host = self.host_entry.get()
+        port = self.port_entry.get()
+        passw = self.password_entry.get()
+        l.info("before rec db")
+
+        request = cursor.execute("SELECT record FROM state")
+        result = request.fetchone()
+        l.info(f"Request: {result}")
+
+        # --- At the beginning of your script, after creating the connection and cursor ---
+
+        try:
+            # Check if the 'state' table exists
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='state'")
+            table_exists = cursor.fetchone()
+
+            if not table_exists:
+                # Create the table if it doesn't exist
+                cursor.execute("CREATE TABLE state (record INTEGER UNIQUE)")
+
+            # Check if a record already exists
+            cursor.execute("SELECT record FROM state")
+            record_exists = cursor.fetchone()
+            if record_exists:
+                rec = record_exists[0]
+            # cursor.execute("UPDATE example SET age = 31 WHERE id = 2")  
+            if record_exists is None:
+                # Insert the initial value if no record is found
+                cursor.execute("INSERT INTO state (record) VALUES (?)", (True,))
+                conn.commit()
+                l.info("Initialized 'state' table with an initial record.")
+                return
+            
+
+            
+            elif rec == 1:
+                cursor.execute("UPDATE state SET record = False WHERE record = True")
+                conn.commit()
+                l.info("Initialized 'state' table with an initial record.")
+                return
+            elif rec == 0:
+                cursor.execute("UPDATE state SET record = True WHERE record = False")
+                conn.commit()
+                l.info("Initialized 'state' table with an initial record.")
+                return
+        except Exception as e:
+            l.error(f"Error during database initialization: {e}")
+
+
+        # await toggleRecording(host, port, passw)
+        # con, message = await self.obsConnect(host, port, passw)
+
+        # if con: 
+        #     l.info("true")
+        #     await toggleRecording(host, port, passw)
+        # elif con == False: 
+        #     await toggleRecording(host, port, passw)
+        #     l.info("false")
+
+    async def execute():
+        l.info("exec")
 
 app = App()
 app.title("cOBaS")
