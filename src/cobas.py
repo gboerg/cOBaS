@@ -7,6 +7,7 @@ from obs.toggleRecording import toggleRecording
 from database import database
 import sys
 import os
+import peewee
 
 # Add the parent directory to the Python path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -15,8 +16,10 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 l.basicConfig(level=l.INFO)
 # counter = 0
 
-cursor = database.cursor
-conn = database.conn
+db = database
+
+# cursor = database.cursor
+# conn = database.conn
 # def on_interaction():
 #     global counter
 #     counter += 1
@@ -45,13 +48,15 @@ class App(customtkinter.CTk):
 
     def __init__(self):
         super().__init__()
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS state (
-                id INTEGER Primary Key ,
-                record BOOL,
-                stream BOOL)
+        # cursor.execute("""
+        #     CREATE TABLE IF NOT EXISTS state (
+        #         id INTEGER PRIMARY KEY,
+        #         record BOOL DEFAULT 0 NOT NULL,
+        #         stream BOOL DEFAULT 0 NOT NULL
+        #     )
+        # """)
 
-        """)
+        # conn.commit()
         self.geometry("1650x850")
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=0)
@@ -161,59 +166,27 @@ class App(customtkinter.CTk):
         passw = self.password_entry.get()
         l.info("before rec db")
 
-        request = cursor.execute("SELECT record FROM state")
-        result = request.fetchone()
-        l.info(f"Request: {result}")
+        try: 
+            entry = database.State.get()
 
-        # --- At the beginning of your script, after creating the connection and cursor ---
-
-        try:
-            # Check if the 'state' table exists
-            cursor.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='state'")
-            table_exists = cursor.fetchone()
-
-            if not table_exists:
-                # Create the table if it doesn't exist
-                cursor.execute("CREATE TABLE state (record INTEGER UNIQUE)")
-
-            # Check if a record already exists
-            cursor.execute("SELECT record FROM state")
-            record_exists = cursor.fetchone()
-            if record_exists:
-                rec = record_exists[0]
-            # cursor.execute("UPDATE example SET age = 31 WHERE id = 2")  
-            if record_exists is None:
-                # Insert the initial value if no record is found
-                cursor.execute("INSERT INTO state (record) VALUES (?)", (True,))
-                conn.commit()
-                l.info("Initialized 'state' table with an initial record.")
+            if entry.record == False:
+                l.info("db is negativ")
+                database.State.update(record=True).where(database.State.record == False).execute()
+                l.info(f"updated entry is now {entry.record}")
+                # await toggleRecording(host, port, passw)
                 return
             
-
+            elif entry.record == True:
+                l.info("db is positiv")
+                database.State.update(record=False).where(database.State.record == True).execute()
+                l.info(f"updated entry is now {entry.record}")
+                # await toggleRecording(host, port, passw)
+                return
             
-            elif rec == 1:
-                cursor.execute("UPDATE state SET record = False WHERE record = True")
-                conn.commit()
-                l.info("Initialized 'state' table with an initial record.")
-                return
-            elif rec == 0:
-                cursor.execute("UPDATE state SET record = True WHERE record = False")
-                conn.commit()
-                l.info("Initialized 'state' table with an initial record.")
-                return
-        except Exception as e:
-            l.error(f"Error during database initialization: {e}")
+        except Exception as e: 
+            l.info(f"Error druing toggle Rec db: {e}")
 
 
-        # await toggleRecording(host, port, passw)
-        # con, message = await self.obsConnect(host, port, passw)
-
-        # if con: 
-        #     l.info("true")
-        #     await toggleRecording(host, port, passw)
-        # elif con == False: 
-        #     await toggleRecording(host, port, passw)
-        #     l.info("false")
 
     async def execute():
         l.info("exec")
