@@ -3,7 +3,7 @@ import logging as l
 
 
 class asAsync():
-    def toAsync(self, kwargs):
+    def toAsync(kwargs):
         if kwargs == "run_all_selected":
             l.info("run current selected")
 

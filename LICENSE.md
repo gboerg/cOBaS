@@ -1,0 +1,1 @@
+Feel free to change the software to your own needs - But mention my repo :>
