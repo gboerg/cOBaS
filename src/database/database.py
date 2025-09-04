@@ -18,18 +18,20 @@ class State(Model):
 db.connect()
 db.create_tables([State])
 
-# Holen Sie sich den einzigen Eintrag oder erstellen Sie ihn, falls er nicht existiert.
-# Der Primärschlüssel 'current_state' sorgt dafür, dass nur eine Zeile erstellt wird.
+# State.get_or_create(False)
+
+# # Holen Sie sich den einzigen Eintrag oder erstellen Sie ihn, falls er nicht existiert.
+# # Der Primärschlüssel 'current_state' sorgt dafür, dass nur eine Zeile erstellt wird.
 state_entry, created = State.get_or_create(state_id='current_state')
 
-# Setzen Sie alle booleschen Felder dynamisch auf False.
-for field_name, field_instance in state_entry._meta.fields.items():
-    if isinstance(field_instance, BooleanField):
-        setattr(state_entry, field_name, False)
+# # Setzen Sie alle booleschen Felder dynamisch auf False.
+# for field_name, field_instance in state_entry._meta.fields.items():
+#     if isinstance(field_instance, BooleanField):
+#         setattr(state_entry, field_name, False)
 
-# Speichern Sie die Änderungen in der Datenbank.
+# # Speichern Sie die Änderungen in der Datenbank.
 state_entry.save()
 
-print("Alle booleschen Felder im State-Modell wurden auf False gesetzt.")
+# print("Alle booleschen Felder im State-Modell wurden auf False gesetzt.")
 
 db.close()
