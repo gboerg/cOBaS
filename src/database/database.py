@@ -13,6 +13,15 @@ class selected(Model):
         database = db
 
 
-db.create_tables([selected])
+class websockets(Model):
+    id = AutoField()
+    host = IntegerField(default=0)
+    port= IntegerField(default=0)
+    password = IntegerField(default=0)
+    class Meta: 
+        database = db
+
+
+db.create_tables([selected, websockets])
 
 # selected.get_or_create()

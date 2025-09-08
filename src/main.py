@@ -2,7 +2,7 @@ import customtkinter as ctk
 from interaction.toggleDarkMode import toggleDarkMode
 from interaction.buttonInteraction import recording_checkbox, connect, add_connect
 from PIL import Image
-
+from database.restoreValues import insertKnownWebsocketsInGui
 from functions.getGuiElement import getGuiElement
 import database.database
 
@@ -25,6 +25,8 @@ class App(ctk.CTk):
         self.setup()
         self.settingsWheel()
         self.create_grid()
+        insertKnownWebsocketsInGui()
+
 
 
     def setup(self):
@@ -129,15 +131,18 @@ class App(ctk.CTk):
 
         self.aside_content_web = ctk.CTkScrollableFrame(master=self.aside)
         self.aside_content_web.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        getGuiElement("websocket_scrollbox", self.aside_content_web)
 
-        example_web_socket_connect = ctk.CTkButton(self.aside_content_web, text="OBS REC [192.162.172.4 | 4455]")
-        example_web_socket_connect.grid(row=1, column=1)
+        # example_web_socket_connect = ctk.CTkButton(self.aside_content_web, text="OBS REC [192.162.172.4 | 4455]")
+        # example_web_socket_connect.grid(row=1, column=1)
+ 
 
 
 
         #NOTE: 
         self.aside_content = ctk.CTkScrollableFrame(master=self.aside)
         self.aside_content.grid(row=3, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+
 
         # Beispiel-Inhalt für das ScrollableFrame
         toggle_record = ctk.CTkButton(self.aside_content, text="Toggle Recording", command=recording_checkbox)
@@ -178,30 +183,34 @@ class App(ctk.CTk):
         info_label = ctk.CTkLabel(self.connect, text="WebSocket:")
         info_label.grid(row=1, column=0, sticky="w", padx=(10, 0))
 
+
         # Center-aligned widgets
         host_label = ctk.CTkLabel(self.connect, text="Host")
         host_label.grid(row=0, column=2, sticky="ew", padx=(10, 0))
 
-        host_entry = ctk.CTkEntry(self.connect, placeholder_text="ip-address")
+        host_entry = ctk.CTkEntry(self.connect, placeholder_text="ip-address of target pc")
         host_entry.grid(row=1, column=2, sticky="ew", padx=10)
+        getGuiElement("host_entry", host_entry)
 
         port_label = ctk.CTkLabel(self.connect, text="Port")
         port_label.grid(row=0, column=3, sticky="ew")
 
         port_entry = ctk.CTkEntry(self.connect, placeholder_text="port")
         port_entry.grid(row=1, column=3, sticky="ew", padx=10)
+        getGuiElement("port_entry", port_entry)
 
         password_label = ctk.CTkLabel(self.connect, text="Password")
         password_label.grid(row=0, column=4, sticky="ew")
 
-        password_entry = ctk.CTkEntry(self.connect, placeholder_text="Password", show="*")
+        password_entry = ctk.CTkEntry(self.connect, placeholder_text="password", show="*")
         password_entry.grid(row=1, column=4, sticky="ew", padx=(10, 10))
+        getGuiElement("password_entry", password_entry)
 
         # Right-aligned buttons
 
-        save_connect_button = ctk.CTkButton(self.connect, text="Add", hover_color="purple", command= add_connect)
-        getGuiElement("save_connect_button", save_connect_button)
-        save_connect_button.grid(row=1, column=6, sticky="e", padx=(5, 5))
+        # save_connect_button = ctk.CTkButton(self.connect, text="Add", hover_color="purple", command= add_connect)
+        # getGuiElement("save_connect_button", save_connect_button)
+        # save_connect_button.grid(row=1, column=6, sticky="e", padx=(5, 5))
         connect_button = ctk.CTkButton(self.connect, text="Connect", hover_color="purple", command= connect)
         getGuiElement("connect_button", connect_button)
         connect_button.grid(row=1, column=7, sticky="e", padx=(0, 0))
