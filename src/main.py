@@ -2,9 +2,11 @@ import customtkinter as ctk
 from interaction.toggleDarkMode import toggleDarkMode
 from interaction.buttonInteraction import recording_checkbox, connect, add_connect
 from PIL import Image
-from database.restoreValues import insertKnownWebsocketsInGui
+from database.restoreManager import insertKnownWebsocketsInGui, debubVals, insertAvailable
 from functions.getGuiElement import getGuiElement
 import database.database
+from events.onMouseEvent import onDrag
+import logging as l
 
 
 
@@ -20,12 +22,18 @@ import database.database
 
 
 class App(ctk.CTk):
+
+
+
     def __init__(self):
         super().__init__()
         self.setup()
         self.settingsWheel()
         self.create_grid()
         insertKnownWebsocketsInGui()
+        debubVals()
+        insertAvailable()
+        
 
 
 
@@ -120,7 +128,7 @@ class App(ctk.CTk):
         self.aside.grid_columnconfigure(0, weight=1) # Spalte für den gesamten Inhalt
 
         # Inhalt des Aside-Frames
-        aside_label = ctk.CTkLabel(self.aside, text="Functions: ")
+        aside_label = ctk.CTkLabel(self.aside, text="Functions:")
         aside_label.grid(row=0, column=0, padx=100, pady=20)
 
         search_bar = ctk.CTkEntry(self.aside, placeholder_text="SEARCH FOR  .... ?")
@@ -138,24 +146,27 @@ class App(ctk.CTk):
  
 
 
-
         #NOTE: 
-        self.aside_content = ctk.CTkScrollableFrame(master=self.aside)
-        self.aside_content.grid(row=3, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        obs = self.aside_content = ctk.CTkScrollableFrame(master=self.aside)
+        children = obs.children
+        
+        obs_grid = self.aside_content.grid(row=3, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
+        getGuiElement("obs_features", obs)
+        l.info(f"children: {children}")
 
 
         # Beispiel-Inhalt für das ScrollableFrame
-        toggle_record = ctk.CTkButton(self.aside_content, text="Toggle Recording", command=recording_checkbox)
-        toggle_record.grid(row=1, column=1)
+        # toggle_record = ctk.CTkButton(self.aside_content, text="Toggle Recording", command=recording_checkbox)
+        # toggle_record.grid(row=1, column=1)
 
 
 
         # NOTE:  
-        self.aside_content2= ctk.CTkScrollableFrame(master=self.aside)
-        self.aside_content2.grid(row=4, column= 0, padx=10, pady=10, sticky="ews")
-        
-        test = ctk.CTkButton(self.aside_content2, text="addDelay(delay ms)")
-        test.grid(row=1, column=1)
+        misc = self.aside_content2= ctk.CTkScrollableFrame(master=self.aside)
+        misc_grid = self.aside_content2.grid(row=4, column= 0, padx=10, pady=10, sticky="news")
+        getGuiElement("misc_features", misc)
+        # test = ctk.CTkButton(self.aside_content2, text="addDelay(delay ms)")
+        # test.grid(row=1, column=1)
         
         # for i in range(20):
         #     ctk.CTkCheckBox(self.aside_content, text=f"Item {i+1}").pack(pady=5, padx=5)
@@ -236,8 +247,10 @@ class App(ctk.CTk):
         content_label = ctk.CTkLabel(self.content, text= "CONFIG OF SELECTED SCRIPTS", )
         content_label.grid(row=0, column= 0)
 
-        self.contentScroll = ctk.CTkScrollableFrame(self.content, scrollbar_button_color="purple")
+        mainFrame = self.contentScroll = ctk.CTkScrollableFrame(self.content, scrollbar_button_color="purple")
         self.contentScroll.grid(row=1, column=0, columnspan=2, rowspan= 1, padx=10, pady=10, sticky="news")
+        getGuiElement("main_frame", mainFrame)
+        
 
 
 
@@ -260,7 +273,7 @@ class App(ctk.CTk):
 
 
 
-        footer_label = ctk.CTkLabel(self.footer, text="Made by Jan Gerstenberg @gboergIndustries with LOVE")
+        footer_label = ctk.CTkLabel(self.footer, text="Made by Jan Gerstenberg @gboergIndustries with LOVE", )
         footer_label.grid(row= 1, column =1, sticky="w")
         # footer_label.pack(padx =20, pady= 20)
 

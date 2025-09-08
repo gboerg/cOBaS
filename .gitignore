@@ -1,1 +1,6 @@
+.env
+lang
+__pycache__
+cobas
 src/database/cobas.db
+src/database/__pycache__/restoreValues.cpython-313.pyc

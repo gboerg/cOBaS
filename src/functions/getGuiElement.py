@@ -15,7 +15,9 @@ def getGuiElement(name, element=None):
         element (any, optional): Das Element, das gespeichert werden soll.
     """
     global gui_element_storage
-    l.warning(f"ELEMENT STORAGE: {gui_element_storage}")
+    # l.warning(f"ELEMENT STORAGE: {gui_element_storage}")
     if element is not None:
         gui_element_storage[name] = element
     return gui_element_storage.get(name)
+
+
