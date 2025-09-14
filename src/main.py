@@ -1,28 +1,20 @@
 import customtkinter as ctk
 from interaction.toggleDarkMode import toggleDarkMode
-from interaction.buttonInteraction import recording_checkbox, connect, add_connect
+from interaction.defaultGUIButtons import recording_checkbox, connect, add_connect, reset
 from PIL import Image
-from database.restoreManager import insertKnownWebsocketsInGui, debubVals, insertAvailable
+from database.dataManager import insertKnownWebsocketsInGui, debubVals, insertAvailable
 from functions.getGuiElement import getGuiElement
+from config.IniManager import generateConfig
 import database.database
-from events.onMouseEvent import onDrag
+from events.onMouseEvent import onDrag, MouseMotion
 import logging as l
+import os
+# from interaction.commandCenter import mainFrameDBCombare
 
 
 
-
-
-# class PhotoClass(ctk.CTkImage):
-#     def __init__(self, light_image = None, dark_image = None, size = ...):
-#         super().__init__(light_image, dark_image, size)
-
-
-#         def settingsWheel(self):
-#             settings_wheel = ctk.CTkImage(dark_image=Image.open("assets/images/settings.png"), size=(30, 30))
-
-
+l.basicConfig(level=l.INFO)
 class App(ctk.CTk):
-
 
 
     def __init__(self):
@@ -33,12 +25,19 @@ class App(ctk.CTk):
         insertKnownWebsocketsInGui()
         debubVals()
         insertAvailable()
+        generateConfig()
+        # self.after(5000, self.start_db_check)
+
+    # def start_db_check(self):
+    #     # Your timed function to compare GUI and database
+    #     mainFrameDBCombare()
+
+    #     # Schedule the next check
+    #     self.after(5000, self.start_db_check) 
         
-
-
-
-    def setup(self):
-        self.title("cOBaS | OBS WebSocket 5.0 CMDR")
+    def setup(self):  
+        getGuiElement("root", self)
+        self.title("cOBaS | OBS WebSocket 5.0 BLDR")
         # self.geometry("1450x725") 
         self.geometry("1650x825") 
         # self.resizable(False, False)
@@ -84,8 +83,10 @@ class App(ctk.CTk):
         self.navbar.grid_columnconfigure(2, weight=0)  # For the switch
         self.navbar.grid_columnconfigure(3, weight=0)  # For the button
 
+        user = os.getlogin()
+
         # Left-aligned widget
-        navbar_label = ctk.CTkLabel(self.navbar, text="cOBaS | OBS WebSocket 5.0 Commander", text_color="purple")
+        navbar_label = ctk.CTkLabel(self.navbar, text=f"Welcome: {user} :> Glad to see you again - What do you want to build today?", height=30)
         navbar_label.grid(row=0, column=0, sticky="w")
 
         # Right-aligned widgets (the switch and the button)
@@ -105,8 +106,10 @@ class App(ctk.CTk):
             text="",
             hover_color="purple",
             image=self.settings_wheel_image,
+
         )
         navbar_button.grid(row=0, column=3, sticky="e")
+        navbar_button.configure()
 
 
 
@@ -114,6 +117,7 @@ class App(ctk.CTk):
 
     def aside_frame(self):
         self.aside = ctk.CTkFrame(self)
+        getGuiElement("aside_frame", self.aside)
         # Aside füllt die Spalte 0 von Zeile 1 bis 3
         self.aside.grid(row=1, column=0, rowspan=3, padx=10, pady=10, sticky="ns")
         
@@ -124,14 +128,14 @@ class App(ctk.CTk):
         self.aside.grid_rowconfigure(2, weight=0) # Zeile für ScrollableFrame
         self.aside.grid_rowconfigure(3, weight=1)
         self.aside.grid_rowconfigure(4, weight=0)
-
+        self.aside.grid_rowconfigure(5, weight=0)
         self.aside.grid_columnconfigure(0, weight=1) # Spalte für den gesamten Inhalt
 
         # Inhalt des Aside-Frames
-        aside_label = ctk.CTkLabel(self.aside, text="Functions:")
+        aside_label = ctk.CTkLabel(self.aside, text="Elements and Functions:")
         aside_label.grid(row=0, column=0, padx=100, pady=20)
 
-        search_bar = ctk.CTkEntry(self.aside, placeholder_text="SEARCH FOR  .... ?")
+        search_bar = ctk.CTkEntry(self.aside, placeholder_text="SEARCH any FOR  .... ?")
         search_bar.grid(row= 1, column = 0)
 
 
@@ -141,121 +145,119 @@ class App(ctk.CTk):
         self.aside_content_web.grid(row=2, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
         getGuiElement("websocket_scrollbox", self.aside_content_web)
 
-        # example_web_socket_connect = ctk.CTkButton(self.aside_content_web, text="OBS REC [192.162.172.4 | 4455]")
-        # example_web_socket_connect.grid(row=1, column=1)
- 
-
+  
 
         #NOTE: 
         obs = self.aside_content = ctk.CTkScrollableFrame(master=self.aside)
-        children = obs.children
         
         obs_grid = self.aside_content.grid(row=3, column=0, columnspan=2, padx=10, pady=10, sticky="nsew")
         getGuiElement("obs_features", obs)
-        l.info(f"children: {children}")
-
-
-        # Beispiel-Inhalt für das ScrollableFrame
-        # toggle_record = ctk.CTkButton(self.aside_content, text="Toggle Recording", command=recording_checkbox)
-        # toggle_record.grid(row=1, column=1)
-
-
+ 
 
         # NOTE:  
         misc = self.aside_content2= ctk.CTkScrollableFrame(master=self.aside)
         misc_grid = self.aside_content2.grid(row=4, column= 0, padx=10, pady=10, sticky="news")
         getGuiElement("misc_features", misc)
-        # test = ctk.CTkButton(self.aside_content2, text="addDelay(delay ms)")
-        # test.grid(row=1, column=1)
         
-        # for i in range(20):
-        #     ctk.CTkCheckBox(self.aside_content, text=f"Item {i+1}").pack(pady=5, padx=5)
+        
 
     def connect_obs_frame(self):
         self.connect = ctk.CTkFrame(self)
+        getGuiElement("connect_frame", self.connect)
         self.connect.grid(row=1, column=1, padx=10, pady=10, sticky="new")
         
-        # Configure the columns for alignment
-        self.connect.grid_columnconfigure(0, weight=0)  # For the "WebSocket:" label
-        self.connect.grid_columnconfigure(1, weight=1)  # Left spacer for centering
-        self.connect.grid_columnconfigure(2, weight=0)  # For host widgets
-        self.connect.grid_columnconfigure(3, weight=0)  # For port widgets
-        self.connect.grid_columnconfigure(4, weight=0)  # For password widgets
-        self.connect.grid_columnconfigure(5, weight=1)  # Right spacer for centering
-        self.connect.grid_columnconfigure(6, weight=0)
-        self.connect.grid_columnconfigure(7, weight=0)  # For Connect button
-        self.connect.grid_columnconfigure(8, weight=0)  # For Previous button
-        
-        # Configure the rows for the labels and entries
+        # Konfiguriere die Spalten, um die gewünschte Anordnung zu erreichen
+        self.connect.grid_columnconfigure(0, weight=0) # WebSocket Label (links)
+        self.connect.grid_columnconfigure(1, weight=1) # Spacer (drückt die Felder nach rechts)
+        self.connect.grid_columnconfigure(2, weight=0) # Name
+        self.connect.grid_columnconfigure(3, weight=0) # Host
+        self.connect.grid_columnconfigure(4, weight=0) # Port
+        self.connect.grid_columnconfigure(5, weight=0) # Password
+        self.connect.grid_columnconfigure(6, weight=1) # Spacer (drückt den Button nach rechts)
+        self.connect.grid_columnconfigure(7, weight=0) # Connect Button (rechts)
+
+        # Konfiguriere die Reihen
         self.connect.grid_rowconfigure(0, weight=0)
         self.connect.grid_rowconfigure(1, weight=0)
 
-        # Left-aligned "WebSocket:" label
+        # 'WebSocket:' Label (ganz links, in Spalte 0)
         info_label = ctk.CTkLabel(self.connect, text="WebSocket:")
         info_label.grid(row=1, column=0, sticky="w", padx=(10, 0))
 
+        # Name-Widgets (zentriert, in Spalte 2)
+        name_label = ctk.CTkLabel(self.connect, text="Name",)
+        name_label.grid(row=0, column=2, sticky="ew")
 
-        # Center-aligned widgets
+
+        name_entry = ctk.CTkEntry(self.connect, placeholder_text="obs record ...(optional)")
+        name_entry.grid(row=1, column=2, sticky="ew", padx=(10, 10))
+        getGuiElement("name_entry", name_entry)
+        
+        # Host-Widgets (zentriert, in Spalte 3)
         host_label = ctk.CTkLabel(self.connect, text="Host")
-        host_label.grid(row=0, column=2, sticky="ew", padx=(10, 0))
+        host_label.grid(row=0, column=3, sticky="ew", padx=(10, 0))
 
         host_entry = ctk.CTkEntry(self.connect, placeholder_text="ip-address of target pc")
-        host_entry.grid(row=1, column=2, sticky="ew", padx=10)
+        host_entry.grid(row=1, column=3, sticky="ew", padx=10)
         getGuiElement("host_entry", host_entry)
 
+        # Port-Widgets (zentriert, in Spalte 4)
         port_label = ctk.CTkLabel(self.connect, text="Port")
-        port_label.grid(row=0, column=3, sticky="ew")
+        port_label.grid(row=0, column=4, sticky="ew")
 
         port_entry = ctk.CTkEntry(self.connect, placeholder_text="port")
-        port_entry.grid(row=1, column=3, sticky="ew", padx=10)
+        port_entry.grid(row=1, column=4, sticky="ew", padx=10)
         getGuiElement("port_entry", port_entry)
 
+        # Password-Widgets (zentriert, in Spalte 5)
         password_label = ctk.CTkLabel(self.connect, text="Password")
-        password_label.grid(row=0, column=4, sticky="ew")
+        password_label.grid(row=0, column=5, sticky="ew")
 
         password_entry = ctk.CTkEntry(self.connect, placeholder_text="password", show="*")
-        password_entry.grid(row=1, column=4, sticky="ew", padx=(10, 10))
+        password_entry.grid(row=1, column=5, sticky="ew", padx=(10, 10))
         getGuiElement("password_entry", password_entry)
-
-        # Right-aligned buttons
-
-        # save_connect_button = ctk.CTkButton(self.connect, text="Add", hover_color="purple", command= add_connect)
-        # getGuiElement("save_connect_button", save_connect_button)
-        # save_connect_button.grid(row=1, column=6, sticky="e", padx=(5, 5))
+        
+        # Connect Button (ganz rechts, in Spalte 7)
         connect_button = ctk.CTkButton(self.connect, text="Connect", hover_color="purple", command= connect)
         getGuiElement("connect_button", connect_button)
         connect_button.grid(row=1, column=7, sticky="e", padx=(0, 0))
-
-        # load_connect_button = ctk.CTkButton(self.connect, text="load", hover_color="purple")
-        # load_connect_button.grid(row=1, column=8, sticky="e")
-
+        
 
 
         
 
     def content_frame(self):
         #, scrollbar_button_color="purple"
-        self.content = ctk.CTkFrame(self)
-        self.content.grid(row=2, column=1, padx= 10, pady=10, sticky= "news")
+        contentFrame = self.content = ctk.CTkFrame(self)
+        contentFrameGrid =self.content.grid(row=2, column=1, padx= 10, pady=10, sticky= "news")
 
         self.content.grid_columnconfigure(0, weight=0)
-        self.content.grid_rowconfigure(0, weight=0)
-        
         self.content.grid_columnconfigure(1, weight=1)
+        self.content.grid_columnconfigure(2, weight=0)
+        
+        self.content.grid_rowconfigure(0, weight=0)
         self.content.grid_rowconfigure(1, weight=1)
-
-        content_label = ctk.CTkLabel(self.content, text= "CONFIG OF SELECTED SCRIPTS", )
-        content_label.grid(row=0, column= 0)
-
-        mainFrame = self.contentScroll = ctk.CTkScrollableFrame(self.content, scrollbar_button_color="purple")
-        self.contentScroll.grid(row=1, column=0, columnspan=2, rowspan= 1, padx=10, pady=10, sticky="news")
-        getGuiElement("main_frame", mainFrame)
+        self.content.grid_rowconfigure(3, weight=0)
         
 
+        # content_label = ctk.CTkLabel(self.content, text= "Graphical Drag N' Drop Script Builder: [ORIENTATION GUIDE] Up -> Down or Left -> Right")
+        content_label = ctk.CTkLabel(self.content, text= "Script Builder:")
+        content_label.grid(row=0, column= 1)
+        
+        clear_Button = ctk.CTkButton(self.content, text="Clear Script", command=reset)
+        clear_Button.grid(row=2, column=1)
 
+        mainFrame = self.contentScroll = ctk.CTkScrollableFrame(self.content)
+        mainFrameGrid = self.contentScroll.grid(row=1, column=0, columnspan=6, rowspan= 1, padx=10, pady=10, sticky="news")
 
+        # MouseMotion(conntentFrame)
+        contentFrame.bind("<Enter>", MouseMotion)
+        contentFrame.bind("<Leave>", MouseMotion)
 
+        getGuiElement("main_frame", mainFrame)
+        getGuiElement("content_frame", contentFrame)
 
+        
 
 
 
