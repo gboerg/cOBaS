@@ -15,6 +15,82 @@ from database.database import websockets, Features, Builder
 
 import colorsys
 
+
+
+def reloadBuilderContent():
+    l.info("reload builder elements and apply settings")
+    all_elements = []
+    
+    
+    builder_elements = Builder.select()
+    websocket_elements = websockets.select()
+    feature_elements = Features.select()
+    
+    # if builder_elements:
+    #     all_elements.append(builder_elements)
+    # if websocket_elements:
+    #     all_elements.append(websocket_elements)
+    # if feature_elements:
+    #     all_elements.append(feature_elements)
+    
+    
+    
+    for socket in websocket_elements:
+        socket_name = socket.all_field
+        socket_color = socket.color
+        socket_text_color = socket.text_color
+        
+        all_elements.append({
+            "WebSockets": {
+                "socket_name": socket_name,
+                "socket_color": socket_color,
+                "socket_text_color": socket_text_color
+            },
+        })
+        
+        
+        
+        l.info(f"Socket_name: {socket_name}")
+        l.info(f"Socket_color: {socket_color}")
+        l.info(f"Socket_text_color: {socket_text_color}")
+        
+    for script in builder_elements:
+        script_name = script.all_name
+        script_location = script.location
+        
+        all_elements.append({
+            "Builder": {
+                "script_name": script_name,
+                "script_location": script_location
+            }
+        })
+        l.info(f"Script_name: {script_name}")
+        l.info(f"Script_location: {script_location}")
+    
+    for feature in feature_elements:
+        feature_name = feature.feature
+        feature_color = feature.feature_color
+        feature_text_color = feature.feature_text_color 
+        all_elements.append({
+            "Features": {
+                "feature_name": feature_name,
+                "feature_color": feature_color, 
+                "feature_text_color": feature_text_color
+            }
+        })
+        l.info(f"Feature_name: {feature_name}")
+        l.info(f"Featur_color: {feature_color}")
+        l.info(f"Feature Text Color: {feature_text_color}")
+    
+    
+    # l.info(f"ALL APPENDED ELEMENTS IF ANY:  {all_elements}")
+    
+    for element in all_elements:
+        l.info()
+        
+        l.info(f"All Element: {element}")    
+
+
 def reset():
     guiElement = getGuiElement("main_frame")
     elements = guiElement.winfo_children()

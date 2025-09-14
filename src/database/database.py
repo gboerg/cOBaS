@@ -24,41 +24,11 @@ class Builder(Model):
     id = AutoField()
     all_name  = CharField()
     feature = CharField(null=True)
-    ctk_name = CharField(null=True)
     location = IntegerField(null=True)
-    
-    content_frame = CharField(null=True)
-    content_frame_settings = CharField()
-    
-    ctk_sub_element_1 = CharField(null=True)
-    ctk_sub_element_1_text = CharField()
-    ctk_sub_element_1_text_color = CharField()
-    ctk_sub_element_1_color = CharField()  # Korrigiert: Klammern hinzugefügt
-    
-    ctk_sub_element_2 = CharField(null=True)
-    ctk_sub_element_2_text = CharField()
-    ctk_sub_element_2_text_color = CharField()
-    ctk_sub_element_2_color = CharField()
-    
-    ctk_sub_element_3 = CharField(null=True)
-    ctk_sub_element_3_text = CharField()
-    ctk_sub_element_3_text_color = CharField()
-    ctk_sub_element_3_color = CharField()
-    
-    ctk_sub_element_4 = CharField(null=True)
-    ctk_sub_element_4_text = CharField()
-    ctk_sub_element_4_text_color = CharField()
-    ctk_sub_element_4_color = CharField()
-    
-    ctk_sub_element_5 = CharField(null=True)
-    ctk_sub_element_5_text = CharField()
-    ctk_sub_element_5_text_color = CharField()
-    ctk_sub_element_5_color = CharField()
-    
-    ctk_sub_element_6 = CharField(null=True)
-    ctk_sub_element_6_text = CharField()
-    ctk_sub_element_6_text_color = CharField()
-    ctk_sub_element_6_color = CharField()
+    content_kwargs = CharField(null=True)
+    format_kwargs = CharField(null = True)
+    command = CharField()
+
 
     class Meta: 
         database = db

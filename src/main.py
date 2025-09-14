@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from interaction.toggleDarkMode import toggleDarkMode
-from interaction.defaultGUIButtons import recording_checkbox, connect, add_connect, reset
+from interaction.defaultGUIButtons import recording_checkbox, connect, add_connect, reset, reloadBuilderContent
 from PIL import Image
 from database.dataManager import insertKnownWebsocketsInGui, debubVals, insertAvailable
 from functions.getGuiElement import getGuiElement
@@ -231,9 +231,11 @@ class App(ctk.CTk):
         contentFrame = self.content = ctk.CTkFrame(self)
         contentFrameGrid =self.content.grid(row=2, column=1, padx= 10, pady=10, sticky= "news")
 
-        self.content.grid_columnconfigure(0, weight=0)
-        self.content.grid_columnconfigure(1, weight=1)
+        self.content.grid_columnconfigure(0, weight=1)
+        self.content.grid_columnconfigure(1, weight=0)
         self.content.grid_columnconfigure(2, weight=0)
+        self.content.grid_columnconfigure(3, weight=1)
+        self.content.grid_columnconfigure(4, weight=0)
         
         self.content.grid_rowconfigure(0, weight=0)
         self.content.grid_rowconfigure(1, weight=1)
@@ -245,7 +247,10 @@ class App(ctk.CTk):
         content_label.grid(row=0, column= 1)
         
         clear_Button = ctk.CTkButton(self.content, text="Clear Script", command=reset)
-        clear_Button.grid(row=2, column=1)
+        clear_Button.grid(row=2, column=1, padx=(5, 5))
+        
+        reload_builder_button = ctk.CTkButton(self.content, text="Reload", command=reloadBuilderContent)
+        reload_builder_button.grid(row=0, column=4)
 
         mainFrame = self.contentScroll = ctk.CTkScrollableFrame(self.content)
         mainFrameGrid = self.contentScroll.grid(row=1, column=0, columnspan=6, rowspan= 1, padx=10, pady=10, sticky="news")

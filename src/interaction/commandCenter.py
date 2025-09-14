@@ -5,52 +5,24 @@ from functions.getGuiElement import getGuiElement
 from playhouse.sqlite_ext import SqliteExtDatabase
 from database.database import db
 from peewee import *
+from optional import Optional
 
 
 
 
-def dbBuilderEntry(name, all_name, frame, button):
+def dbBuilderEntry(all_name, feature, content_kwargs, format_kwargs, command):
     # Korrekte Prüfung ob Tabelle leer ist
+    content_kwargs 
+    format_kwargs
     if not Builder.select().exists():
         l.info("nothing in builder")
         Builder.create(
-            feature=name,
-            all_name = all_name,
-            ctk_name="",  # Sicherstellen, dass es ein String ist
-            location=1,  # HIER WAR DER FEHLER: Sie hatten location=1 statt new_location
-            
-            content_frame=str(frame),
-            content_frame_settings="",
-            
-            ctk_sub_element_1=str(button),  # Sicherstellen, dass es ein String ist
-            ctk_sub_element_1_text="",
-            ctk_sub_element_1_text_color="",
-            ctk_sub_element_1_color="",
-            
-            ctk_sub_element_2="",
-            ctk_sub_element_2_text="",
-            ctk_sub_element_2_text_color="",
-            ctk_sub_element_2_color="",
-            
-            ctk_sub_element_3="",
-            ctk_sub_element_3_text="",
-            ctk_sub_element_3_text_color="",
-            ctk_sub_element_3_color="",
-            
-            ctk_sub_element_4="",
-            ctk_sub_element_4_text="",
-            ctk_sub_element_4_text_color="",
-            ctk_sub_element_4_color="",
-            
-            ctk_sub_element_5="",
-            ctk_sub_element_5_text="",
-            ctk_sub_element_5_text_color="",
-            ctk_sub_element_5_color="",
-            
-            ctk_sub_element_6="",
-            ctk_sub_element_6_text="",
-            ctk_sub_element_6_text_color="",
-            ctk_sub_element_6_color="",
+            all_name  = all_name,
+            feature = feature, 
+            # content_kwargs = content_kwargs,
+            # format_kwargs = format_kwargs,
+            location = 1,
+            command = command
         )
     elif Builder.select():
         # Höchste Location finden und inkrementieren
@@ -60,43 +32,12 @@ def dbBuilderEntry(name, all_name, frame, button):
         l.info(f"Entry detected placing new one at location: {new_location}")
         
         Builder.create(
-            feature=name,
-            all_name = all_name,
-            ctk_name="",  # Sicherstellen, dass es ein String ist
-            location=new_location,  # HIER WAR DER FEHLER: Sie hatten location=1 statt new_location
-            
-            content_frame=str(frame),
-            content_frame_settings="",
-            
-            ctk_sub_element_1=str(button),  # Sicherstellen, dass es ein String ist
-            ctk_sub_element_1_text="",
-            ctk_sub_element_1_text_color="",
-            ctk_sub_element_1_color="",
-            
-            ctk_sub_element_2="",
-            ctk_sub_element_2_text="",
-            ctk_sub_element_2_text_color="",
-            ctk_sub_element_2_color="",
-            
-            ctk_sub_element_3="",
-            ctk_sub_element_3_text="",
-            ctk_sub_element_3_text_color="",
-            ctk_sub_element_3_color="",
-            
-            ctk_sub_element_4="",
-            ctk_sub_element_4_text="",
-            ctk_sub_element_4_text_color="",
-            ctk_sub_element_4_color="",
-            
-            ctk_sub_element_5="",
-            ctk_sub_element_5_text="",
-            ctk_sub_element_5_text_color="",
-            ctk_sub_element_5_color="",
-            
-            ctk_sub_element_6="",
-            ctk_sub_element_6_text="",
-            ctk_sub_element_6_text_color="",
-            ctk_sub_element_6_color="",
+            all_name  = all_name,
+            feature = feature, 
+            # content_kwargs = content_kwargs,
+            # format_kwargs = format_kwargs,
+            location = new_location,
+            command = command
         )
 
 def generateButtonFrame(all_name, button_name: str, master, text_name, text_color, fg_color):
@@ -116,7 +57,8 @@ def generateButtonFrame(all_name, button_name: str, master, text_name, text_colo
             location.pack(side="left", padx=(5, 5))
             location_entry.pack(side="left", padx=(5, 5))
         
-        dbBuilderEntry(string, all_name, frame_name, button_name)
+        dbBuilderEntry(all_name=all_name, feature=string, content_kwargs=[f"Active {str(text_name)}"], format_kwargs=[fg_color, text_color], command=["command=lambda btn=button_name: command_center(btn)"])
+        
     except Exception as e:
         l.error(f"Error in generateButtonFrame: {e}")
 
@@ -148,12 +90,10 @@ def generateSwitchFrame(all_name, button_name: str, master, text_name, text_colo
         obs_switch_to.pack(side="left", padx=(5, 5))
         
         string = str(button_name)
-        dbBuilderEntry(string, all_name, obs_switch_frame, button_widget)
     except Exception as e:
         l.error(f"Error in generateSwitchFrame: {e}")
         
         
-import customtkinter
 
             
 def command_center(event: ctk.CTkButton):
@@ -221,7 +161,7 @@ def command_center(event: ctk.CTkButton):
         
         
         if Builder.select().where(Builder.all_name == text):
-            warning = ctk.CTkLabel(mainFrame, text="ERROR: WEBSOCKET ALREADY ACTIVE!", fg_color="red")
+            warning = ctk.CTkLabel(mainFrame, text="ERROR: WEBSOCKET ALREADY ACTIVE!", fg_color="red", corner_radius=8)
             warning.pack(pady=(5,5))
             l.info("CANCEL NO WEBSOCKET")
             l.warn("existing socket creeate")
@@ -256,7 +196,7 @@ def command_center(event: ctk.CTkButton):
                 
                 
         else:
-            warning = ctk.CTkLabel(mainFrame, text="ERROR: SELECT WEBSOCKET FIRST!", fg_color="red")
+            warning = ctk.CTkLabel(mainFrame, text="ERROR: SELECT WEBSOCKET FIRST!", fg_color="red", corner_radius=8)
             warning.pack(pady=(5,5))
             l.info("CANCEL NO WEBSOCKET")
         

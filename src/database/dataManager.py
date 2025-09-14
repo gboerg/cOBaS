@@ -17,6 +17,12 @@ import random
 import matplotlib.colors as mcolors
 
 
+def reloadAllElements():
+    insertKnownWebsocketsInGui()
+    insertAvailable()
+    insertMiscAvailable()
+
+
 def insertKnownWebsocketsInGui():
     scrollbox = getGuiElement("websocket_scrollbox")
     if not scrollbox or scrollbox is None:
@@ -60,70 +66,70 @@ def insertKnownWebsocketsInGui():
 def debubVals():
     features_to_add = [
         # Audio/Input Controls
-        "OBS Get Input List",
-        "OBS Get Input Mute",
-        "OBS Get Input Settings",
-        "OBS Get Input Volume", 
-        "OBS Set Input Mute",
-        "OBS Set Input Settings",
-        "OBS Set Input Volume",
-        "OBS Toggle Input Mute",
+        # "OBS Get Input List",
+        # "OBS Get Input Mute",
+        # "OBS Get Input Settings",
+        # "OBS Get Input Volume", 
+        # "OBS Set Input Mute",
+        # "OBS Set Input Settings",
+        # "OBS Set Input Volume",
+        # "OBS Toggle Input Mute",
         
-        # General/System
-        "OBS Get Version",
-        "OBS Get Stats",
-        "OBS Get Profile List",
-        "OBS Get Current Profile",
-        "OBS Set Current Profile",
-        "OBS Get Scene Collection List", 
-        "OBS Get Current Scene Collection",
-        "OBS Set Current Scene Collection",
-        "OBS Create Scene Collection",
-        "OBS Get Hotkey List",
-        "OBS Trigger Hotkey By Name",
+        # # General/System
+        # "OBS Get Version",
+        # "OBS Get Stats",
+        # "OBS Get Profile List",
+        # "OBS Get Current Profile",
+        # "OBS Set Current Profile",
+        # "OBS Get Scene Collection List", 
+        # "OBS Get Current Scene Collection",
+        # "OBS Set Current Scene Collection",
+        # "OBS Create Scene Collection",
+        # "OBS Get Hotkey List",
+        # "OBS Trigger Hotkey By Name",
         
-        # Recording Controls
-        "OBS Get Record Status",
-        "OBS Start Record",
-        "OBS Stop Record",
-        "OBS Toggle Recording",  # Bereits vorhanden
-        "OBS Pause Record",
-        "OBS Resume Record",
+        # # Recording Controls
+        # "OBS Get Record Status",
+        # "OBS Start Record",
+        # "OBS Stop Record",
+        # "OBS Toggle Recording",  # Bereits vorhanden
+        # "OBS Pause Record",
+        # "OBS Resume Record",
         
         # Replay Buffer
-        "OBS Get Replay Buffer Status",
-        "OBS Start Replay Buffer",
-        "OBS Stop Replay Buffer",
-        "OBS Save Replay Buffer",
-        "OBS Toggle Instant Replay()",  # Bereits vorhanden
+        # "OBS Get Replay Buffer Status",
+        # "OBS Start Replay Buffer",
+        # "OBS Stop Replay Buffer",
+        # "OBS Save Replay Buffer",
+        # "OBS Toggle Instant Replay()",  # Bereits vorhanden
         
-        # Scene Controls
-        "OBS Get Current Program Scene", 
-        "OBS Get Current Preview Scene",
-        "OBS Get Scene List",
-        "OBS Set Current Program Scene",
-        "OBS Set Current Preview Scene", 
-        "OBS Create Scene",
-        "OBS Remove Scene",
-        "OBS Set Scene Name",
-        "OBS Switch Scene[entry1, entry2]",  # Angepasst von bestehend
+        # # Scene Controls
+        # "OBS Get Current Program Scene", 
+        # "OBS Get Current Preview Scene",
+        # "OBS Get Scene List",
+        # "OBS Set Current Program Scene",
+        # "OBS Set Current Preview Scene", 
+        # "OBS Create Scene",
+        # "OBS Remove Scene",
+        # "OBS Set Scene Name",
+        # "OBS Switch Scene[entry1, entry2]",  # Angepasst von bestehend
         
-        # Scene Items
-        "OBS Get Scene Item List",
-        "OBS Get Scene Item Enabled",
-        "OBS Set Scene Item Enabled",
-        "OBS Get Scene Item Transform",
-        "OBS Set Scene Item Transform",
-        "OBS Get Scene Item Index",
-        "OBS Set Scene Item Index",
+        # # Scene Items
+        # "OBS Get Scene Item List",
+        # "OBS Get Scene Item Enabled",
+        # "OBS Set Scene Item Enabled",
+        # "OBS Get Scene Item Transform",
+        # "OBS Set Scene Item Transform",
+        # "OBS Get Scene Item Index",
+        # "OBS Set Scene Item Index",
         
-        # Sources
-        "OBS Get Source Active",
-        "OBS Get Source Screenshot",
-        "OBS Get Source Settings", 
-        "OBS Set Source Settings",
-        "OBS Create Input",
-        "OBS Remove Input",
+        # # Sources
+        # "OBS Get Source Active",
+        # "OBS Get Source Screenshot",
+        # "OBS Get Source Settings", 
+        # "OBS Set Source Settings",
+        # "OBS Create Input",
+        # "OBS Remove Input",
         
         # Streaming Controls  
         "OBS Get Stream Status",
@@ -132,43 +138,43 @@ def debubVals():
         "OBS Toggle Streaming",  # Bereits vorhanden
         "OBS Send Stream Caption",
         
-        # Studio Mode
-        "OBS Get Studio Mode Enabled",
-        "OBS Set Studio Mode Enabled", 
-        "OBS Toggle Studio Mode",
-        "OBS Trigger Studio Mode Transition",
+        # # Studio Mode
+        # "OBS Get Studio Mode Enabled",
+        # "OBS Set Studio Mode Enabled", 
+        # "OBS Toggle Studio Mode",
+        # "OBS Trigger Studio Mode Transition",
         
-        # Transitions
-        "OBS Get Current Scene Transition",
-        "OBS Set Current Scene Transition",
-        "OBS Get Scene Transition List",
-        "OBS Get Transition Duration", 
-        "OBS Set Transition Duration",
-        "OBS Trigger Scene Transition",
+        # # Transitions
+        # "OBS Get Current Scene Transition",
+        # "OBS Set Current Scene Transition",
+        # "OBS Get Scene Transition List",
+        # "OBS Get Transition Duration", 
+        # "OBS Set Transition Duration",
+        # "OBS Trigger Scene Transition",
         
-        # Virtual Camera
-        "OBS Get Virtual Cam Status",
-        "OBS Start Virtual Cam",
-        "OBS Stop Virtual Cam", 
-        "OBS Toggle Virtual Cam",
+        # # Virtual Camera
+        # "OBS Get Virtual Cam Status",
+        # "OBS Start Virtual Cam",
+        # "OBS Stop Virtual Cam", 
+        # "OBS Toggle Virtual Cam",
         
-        # Media Controls  
-        "OBS Trigger Media Input Action",
-        "OBS Get Media Input Status",
-        "OBS Set Media Input Cursor",
-        "OBS Offset Media Input Cursor",
+        # # Media Controls  
+        # "OBS Trigger Media Input Action",
+        # "OBS Get Media Input Status",
+        # "OBS Set Media Input Cursor",
+        # "OBS Offset Media Input Cursor",
         
         # Filters
-        "OBS Get Source Filter List",
-        "OBS Get Source Filter",
-        "OBS Set Source Filter Enabled",
-        "OBS Set Source Filter Settings",
-        "OBS Create Source Filter",
-        "OBS Remove Source Filter",
+        # "OBS Get Source Filter List",
+        # "OBS Get Source Filter",
+        # "OBS Set Source Filter Enabled",
+        # "OBS Set Source Filter Settings",
+        # "OBS Create Source Filter",
+        # "OBS Remove Source Filter",
         
-        # Custom/Vendor
-        "OBS Call Vendor Request",
-        "OBS Broadcast Custom Event",
+        # # Custom/Vendor
+        # "OBS Call Vendor Request",
+        # "OBS Broadcast Custom Event",
         
         # Utility Functions (bereits vorhanden)
         "add_Delay(amount)",
