@@ -1,7 +1,5 @@
 import customtkinter as ctk
 
-# You might want to define the initial mode
-# ctk.set_appearance_mode("Dark")
 
 def toggleDarkMode():
     # Get the current appearance mode

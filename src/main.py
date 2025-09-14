@@ -1,17 +1,16 @@
 import customtkinter as ctk
 from interaction.toggleDarkMode import toggleDarkMode
-from interaction.defaultGUIButtons import recording_checkbox, connect, add_connect, reset, reloadBuilderContent
+from interaction.defaultGUIButtons import connect, reset
 from PIL import Image
 from database.dataManager import insertKnownWebsocketsInGui, debubVals, insertAvailable
 from functions.getGuiElement import getGuiElement
 from config.IniManager import generateConfig
-import database.database
 from events.onMouseEvent import onDrag, MouseMotion
 import logging as l
 import os
 # from interaction.commandCenter import mainFrameDBCombare
 
-
+from functions.sharedFunctions import reloadBuilderContent
 
 l.basicConfig(level=l.INFO)
 class App(ctk.CTk):
@@ -213,6 +212,8 @@ class App(ctk.CTk):
         password_label = ctk.CTkLabel(self.connect, text="Password")
         password_label.grid(row=0, column=5, sticky="ew")
 
+        
+
         password_entry = ctk.CTkEntry(self.connect, placeholder_text="password", show="*")
         password_entry.grid(row=1, column=5, sticky="ew", padx=(10, 10))
         getGuiElement("password_entry", password_entry)
@@ -249,7 +250,8 @@ class App(ctk.CTk):
         clear_Button = ctk.CTkButton(self.content, text="Clear Script", command=reset)
         clear_Button.grid(row=2, column=1, padx=(5, 5))
         
-        reload_builder_button = ctk.CTkButton(self.content, text="Reload", command=reloadBuilderContent)
+        # reload_builder_button = ctk.CTkButton(self.content, text="Reload / RESTORE", command=reloadBuilderContent)
+        reload_builder_button = ctk.CTkButton(self.content, text="Reload / RESTORE", command=reloadBuilderContent)
         reload_builder_button.grid(row=0, column=4)
 
         mainFrame = self.contentScroll = ctk.CTkScrollableFrame(self.content)
@@ -258,9 +260,11 @@ class App(ctk.CTk):
         # MouseMotion(conntentFrame)
         contentFrame.bind("<Enter>", MouseMotion)
         contentFrame.bind("<Leave>", MouseMotion)
+    
 
         getGuiElement("main_frame", mainFrame)
         getGuiElement("content_frame", contentFrame)
+        getGuiElement("reload_button", reload_builder_button)
 
         
 
@@ -270,7 +274,6 @@ class App(ctk.CTk):
     def footer_frame(self):
         self.footer = ctk.CTkFrame(self)
         self.footer.grid(row=3, column=1, padx= 10, pady=10, sticky= "news")
-
 
         self.footer.grid_rowconfigure(1, weight=0)
         self.footer.grid_columnconfigure(0, weight=0)
@@ -289,7 +292,6 @@ class App(ctk.CTk):
 
         export_button = ctk.CTkButton(self.footer, text="EXPORT", hover_color="purple")
         export_button.grid(row=1, column=3, sticky="e")
-
 
 
 

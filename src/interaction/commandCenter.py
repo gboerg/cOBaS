@@ -1,46 +1,55 @@
 import customtkinter as ctk
 import logging as l
+
+
+
+
+
 from database.database import websockets, Features, Builder
 from functions.getGuiElement import getGuiElement
-from playhouse.sqlite_ext import SqliteExtDatabase
-from database.database import db
 from peewee import *
 from optional import Optional
+from events.onKeyBoardEvent import onKeyBoardEnterPress
 
 
 
 
-def dbBuilderEntry(all_name, feature, content_kwargs, format_kwargs, command):
+
+
+def dbBuilderEntry(all_name, feature, content_kwargs: ctk, format_kwargs, command, location):
     # Korrekte Prüfung ob Tabelle leer ist
-    content_kwargs 
+    pass
+    # return
     format_kwargs
     if not Builder.select().exists():
         l.info("nothing in builder")
-        Builder.create(
+        new_string = f"{location}+{all_name}"
+        
+        Builder.get_or_create(
             all_name  = all_name,
-            feature = feature, 
-            # content_kwargs = content_kwargs,
+            feature = new_string, 
+            content_kwargs = content_kwargs,
             # format_kwargs = format_kwargs,
-            location = 1,
+            location = location,
             command = command
         )
     elif Builder.select():
         # Höchste Location finden und inkrementieren
-        max_location_entry = Builder.select().order_by(Builder.location.desc()).first()
-        new_location = max_location_entry.location + 1
+        # max_location_entry = Builder.select().order_by(Builder.location.desc()).first()
+        # new_location = max_location_entry.location + 1
         
-        l.info(f"Entry detected placing new one at location: {new_location}")
-        
-        Builder.create(
+        # l.info(f"Entry detected placing new one at location: {new_location}")
+        new_string = f"{location}+{all_name}"
+        Builder.get_or_create(
             all_name  = all_name,
-            feature = feature, 
-            # content_kwargs = content_kwargs,
+            feature = new_string,
+            content_kwargs = content_kwargs,
             # format_kwargs = format_kwargs,
-            location = new_location,
+            location = location,
             command = command
         )
 
-def generateButtonFrame(all_name, button_name: str, master, text_name, text_color, fg_color):
+def generateButtonFrame(all_name, button_name: str, master, text_name, text_color, fg_color, location: int, db_entry: bool):
     try:
         frame_name = ctk.CTkFrame(master)
         frame_name.pack(pady=(5, 5))
@@ -49,20 +58,28 @@ def generateButtonFrame(all_name, button_name: str, master, text_name, text_colo
 
         button_name = ctk.CTkButton(master=frame_name, text=f"Active {str(text_name)}", fg_color=fg_color, text_color=text_color)
         button_name.configure(command=lambda btn=button_name: command_center(btn))
+        label = ctk.CTkLabel(frame_name, text=location)
+        label.pack(padx=(5,5), side = "left")
         button_name.pack(side="right", padx=(5, 5))
-
+        locationLabel_entry = ""
         if "WebSocket" not in str(text_name): 
-            location = ctk.CTkLabel(master=frame_name, text="Active Location: ")
-            location_entry = ctk.CTkEntry(master=frame_name)
-            location.pack(side="left", padx=(5, 5))
-            location_entry.pack(side="left", padx=(5, 5))
-        
-        dbBuilderEntry(all_name=all_name, feature=string, content_kwargs=[f"Active {str(text_name)}"], format_kwargs=[fg_color, text_color], command=["command=lambda btn=button_name: command_center(btn)"])
+            locationLabel = ctk.CTkLabel(master=frame_name, text="Active Location: ")
+            locationLabel_entry = ctk.CTkEntry(master=frame_name)
+            locationLabel.pack(side="left", padx=(5, 5))
+            locationLabel_entry.pack(side="left", padx=(5, 5))
+            locationLabel_entry.bind("<Return>", onKeyBoardEnterPress)
+            
+            getGuiElement(f"{location}+{all_name}", locationLabel_entry)
+            # if db_entry == True:
+            #     dbBuilderEntry(all_name=all_name, feature=string, content_kwargs=locationLabel_entry, format_kwargs=[fg_color, text_color], command=[f""], location=location)
+            #     return
+        if db_entry == True:
+            dbBuilderEntry(all_name=all_name, feature=string, content_kwargs=locationLabel_entry, format_kwargs=[fg_color, text_color], command=[f""], location=location)
         
     except Exception as e:
         l.error(f"Error in generateButtonFrame: {e}")
 
-def generateSwitchFrame(all_name, button_name: str, master, text_name, text_color, fg_color, switch_text_1, switch_text_2, obs_values, obs_to_values):
+def generateSwitchFrame(all_name, button_name: str, master, text_name, text_color, fg_color, switch_text_1, switch_text_2, obs_values, obs_to_values, location: int, db_entry: bool):
     try:
         obs_switch_frame = ctk.CTkFrame(master)
         obs_switch_frame.pack(pady=(5, 5))
@@ -72,6 +89,7 @@ def generateSwitchFrame(all_name, button_name: str, master, text_name, text_colo
         
         obs_location_entry = ctk.CTkEntry(obs_switch_frame, placeholder_text="Spot in Builder ")
         obs_location_entry.pack(side="left")
+        obs_location_entry.bind("<Return>", onKeyBoardEnterPress)
         
         button_widget = ctk.CTkButton(obs_switch_frame, text=f"Active {str(text_name)}", fg_color=fg_color, text_color=text_color)
         button_widget.configure(command=lambda btn=button_widget: command_center(btn))
@@ -88,8 +106,11 @@ def generateSwitchFrame(all_name, button_name: str, master, text_name, text_colo
         obs_switch_to_label.pack(side="left")
         obs_switch_to = ctk.CTkComboBox(obs_switch_frame, values=obs_to_values)
         obs_switch_to.pack(side="left", padx=(5, 5))
-        
         string = str(button_name)
+        
+        if db_entry == True:
+            l.info("DB ENTRY DONE")
+            
     except Exception as e:
         l.error(f"Error in generateSwitchFrame: {e}")
         
@@ -172,25 +193,41 @@ def command_center(event: ctk.CTkButton):
             
             
         elif not Builder.select().where(Builder.all_name ==text) :
-            generateButtonFrame(text,"WebSocket", mainFrame, text, text_color, fg_color)
-        # generateSwitchFrame("socket", mainFrame, text, text_color, fg_color, "jheje", "sdsdsa", "sdsdk", "sdasd")
+            count = Builder.select().count()
+            if count:
+                generateButtonFrame(text, text, mainFrame, text, text_color, fg_color, count, True)
+            else:
+                if "WebSocket" in text:
+                    count = 0   
+                else:
+                    count = 1
+                    
+                generateButtonFrame(text, text, mainFrame, text, text_color, fg_color, count, True)
         
         
         
     if featureSingleDb and not "Active" in text: 
         
-        if Builder.select().where(Builder.feature == "WebSocket"):
+        if Builder.select().where(Builder.all_name.contains("WebSocket")):
             
         
             if "OBS" and not "[" in text:
-                generateButtonFrame(text, text, mainFrame, text, text_color, fg_color)
-                l.info("OBS FUNCTION DETECTED")
+                count = Builder.select().count()
+                if count:
+                    generateButtonFrame(text, text, mainFrame, text, text_color, fg_color, count, True)
+                else:   
+                    count = 1
+                    generateButtonFrame(text, text, mainFrame, text, text_color, fg_color, count, True)
             elif "(" and not "["in text:
-                generateButtonFrame(text, text, mainFrame, text, text_color, fg_color)
-                l.info("Amount Function detected")
+                count = Builder.select().count()
+                if count:
+                    generateButtonFrame(text, text, mainFrame, text, text_color, fg_color, count, True)
+                else:   
+                    count = 1
+                    generateButtonFrame(text, text, mainFrame, text, text_color, fg_color, count, True)
             elif "[" in text:
                 
-                generateSwitchFrame(text, text, mainFrame, text, text_color, fg_color, "from", "to",["123", "456"], ["789", "012"])
+                generateSwitchFrame(text, text, mainFrame, text, text_color, fg_color, "from", "to",["123", "456"], ["789", "012"], True)
             else:
                 l.info("Else Function")
                 

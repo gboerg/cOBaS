@@ -3,7 +3,7 @@ import logging as l
 from functions.getGuiElement import getGuiElement
 from database.dataManager import insertKnownWebsocketsInGui
 import peewee
-
+import re
 import time
 import random
 import matplotlib.colors as mcolors
@@ -16,81 +16,175 @@ from database.database import websockets, Features, Builder
 import colorsys
 
 
-
-def reloadBuilderContent():
-    l.info("reload builder elements and apply settings")
-    all_elements = []
-    
-    
-    builder_elements = Builder.select()
-    websocket_elements = websockets.select()
-    feature_elements = Features.select()
-    
-    # if builder_elements:
-    #     all_elements.append(builder_elements)
-    # if websocket_elements:
-    #     all_elements.append(websocket_elements)
-    # if feature_elements:
-    #     all_elements.append(feature_elements)
-    
-    
-    
-    for socket in websocket_elements:
-        socket_name = socket.all_field
-        socket_color = socket.color
-        socket_text_color = socket.text_color
-        
-        all_elements.append({
-            "WebSockets": {
-                "socket_name": socket_name,
-                "socket_color": socket_color,
-                "socket_text_color": socket_text_color
-            },
-        })
-        
-        
-        
-        l.info(f"Socket_name: {socket_name}")
-        l.info(f"Socket_color: {socket_color}")
-        l.info(f"Socket_text_color: {socket_text_color}")
-        
-    for script in builder_elements:
-        script_name = script.all_name
-        script_location = script.location
-        
-        all_elements.append({
-            "Builder": {
-                "script_name": script_name,
-                "script_location": script_location
-            }
-        })
-        l.info(f"Script_name: {script_name}")
-        l.info(f"Script_location: {script_location}")
-    
-    for feature in feature_elements:
-        feature_name = feature.feature
-        feature_color = feature.feature_color
-        feature_text_color = feature.feature_text_color 
-        all_elements.append({
-            "Features": {
-                "feature_name": feature_name,
-                "feature_color": feature_color, 
-                "feature_text_color": feature_text_color
-            }
-        })
-        l.info(f"Feature_name: {feature_name}")
-        l.info(f"Featur_color: {feature_color}")
-        l.info(f"Feature Text Color: {feature_text_color}")
-    
-    
-    # l.info(f"ALL APPENDED ELEMENTS IF ANY:  {all_elements}")
-    
-    for element in all_elements:
-        l.info()
-        
-        l.info(f"All Element: {element}")    
+# def destroyMainFrame():
+#     mainFrame = getGuiElement("main_frame")
+#     mainFrameElements = mainFrame.winfo_children()
+#     for each in mainFrameElements:
+#         each.destroy()
 
 
+# def previousVals(entry):
+#     selectprevios_location = Builder.select().where(Builder.location == entry)
+#     prev_location=""
+#     prev_all_name=""
+#     for each in selectprevios_location:
+#         prev_location= each.location
+#         prev_all_name = each.all_name
+        
+# return p
+# def crossfunction():
+#     reloadBuilderContent()
+    
+# def checkMainFrame():
+#     mainFrame = getGuiElement("main_frame")
+#     mainFrameElements = mainFrame.winfo_children()
+#     for each in mainFrameElements:
+        
+#         try:
+#             l.info(f"each: {each}")
+#             if each:
+#                 l.info(f"Elements detected Resorting: {each}")
+#                 if isinstance(each, (ctk.CTkFrame)):
+#                     content = Builder.select()
+#                     l.info(f"Content: {content}")
+                    
+#                     for each in content:
+#                         feature = each.feature
+#                         all_name = each.all_name
+#                         location = each.location
+#                         l.info(f"entry: {feature}")
+                        
+#                         if "WebSocket" not in feature:
+#                             r_widget = getGuiElement(f"{feature}")
+#                             entry = r_widget.get()
+                            
+#                             l.info(f"Widget entry value: {entry}")
+                            
+#                             if entry == "0":
+#                                 l.info("Entry is 0, returning")
+#                                 return
+                            
+#                             if entry:
+
+#                                 selectprevios_location = Builder.select().where(Builder.location == entry)
+#                                 prev_location=""
+#                                 prev_all_name=""
+#                                 for each in selectprevios_location:
+#                                     prev_location= each.location
+#                                     prev_all_name = each.all_name
+                                    
+                                    
+#                                     delete = Builder.delete().where(Builder.all_name == all_name)
+#                                     delete.execute()
+#                                     delete2 = Builder.delete().where(Builder.all_name == prev_all_name)
+#                                     delete2.execute()
+                                    
+#                                     dbBuilderEntry(all_name=all_name, feature=feature, content_kwargs="", format_kwargs="", command="", location=entry)
+#                                     dbBuilderEntry(all_name=prev_all_name, feature=feature, content_kwargs="", format_kwargs="", command="", location=location)
+                                
+                                    
+#                                 l.info(f"Entry: {all_name} changes place with {prev_all_name} | {all_name} is now on {prev_location} and {prev_all_name} is{entry}")
+#                                 l.info("after")
+#                                 return
+  
+#                 # 
+#                 return
+
+#         except Exception as e:
+#             l.info(f"error {e}")
+      
+# def reloadBuilderContent():
+#     mainFrame = getGuiElement("main_frame")
+#     mainFrameElements = mainFrame.winfo_children()
+
+#     websocket_list = []
+#     builder_list = []
+#     feature_list = []
+    
+
+
+#     checkMainFrame()
+#     destroyMainFrame()
+    
+    
+#     # Alle Daten als Listen sammeln
+#     for socket in websockets.select():
+#         websocket_list.append({
+#             "key": socket.all_field,
+#             "color": socket.color,
+#             "text_color": socket.text_color
+#         })
+    
+#     for script in Builder.select():
+#         builder_list.append({
+#             "key": script.feature,
+#             "location": script.location,
+#             "content_kwargs": script.content_kwargs
+#         })
+    
+#     for feature in Features.select():
+#         feature_list.append({
+#             "key": feature.feature,
+#             "color": feature.feature_color,
+#             "text_color": feature.feature_text_color
+#         })
+        
+        
+        
+
+    
+#     # Für jeden Builder einen Button erstellen
+#     for builder in builder_list:
+#         builder_name = builder["key"]
+#         location = int(builder["location"])
+        
+
+        
+#         # Finde alle passenden WebSockets (CONTAINS)
+#         for socket in websocket_list:
+#             if builder_name in socket["key"] or socket["key"] in builder_name:  # ← CONTAINS!
+#                 l.info(f"Match: '{builder_name}' <-> '{socket['key']}'")
+                
+#                 alln = Builder.select().where(Builder.all_name == builder_name)
+#                 name = Builder.select().where(Builder.feature.contains(builder_name))
+                
+#                 for each in name:
+#                     l.info(f"counter check: {each.all_name}")
+#                     builder_name = each.all_name
+                    
+                
+#                 generateButtonFrame(
+#                     all_name=f"{alln}",
+#                     button_name=builder_name,
+#                     master=mainFrame,
+#                     text_color=socket["text_color"],
+#                     text_name=builder_name,
+#                     fg_color=socket["color"],
+#                     location=location,
+#                     db_entry=False
+#                 )
+        
+#         # Finde alle passenden Features (CONTAINS)
+#         for feature in feature_list:
+#             if builder_name in feature["key"] or feature["key"] in builder_name:  # ← CONTAINS!
+#                 l.info(f"Match: '{builder_name}' <-> '{feature['key']}'")
+#                 removestring = "0123456789+-"
+#                 for each in removestring:
+#                     builder_name = builder_name.replace(each, "")
+#                 l.info(f"new name {builder_name}")
+#                 generateButtonFrame(
+                    
+                    
+#                     all_name=f"{builder_name}",
+#                     button_name=builder_name,
+#                     master=mainFrame,
+#                     text_color=feature["text_color"],
+#                     text_name=builder_name,
+#                     fg_color=feature["color"],
+#                     location=location,
+#                     db_entry=False
+#                 )
+    
 def reset():
     guiElement = getGuiElement("main_frame")
     elements = guiElement.winfo_children()

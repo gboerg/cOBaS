@@ -1,22 +1,19 @@
 from database.database import websockets, Features, Builder
 from functions.getGuiElement import getGuiElement
-from events.onMouseEvent import onDrag, onDrop
-import random
-import matplotlib.colors as mcolors
 from matplotlib_colors import colormap_names
 from interaction.commandCenter import command_center
 # from interaction.buttonInteraction import command_center
 
 import customtkinter as ctk
 import logging as l
-
-
 import colorsys
 import colorsys
 import random
 import matplotlib.colors as mcolors
 
 
+    
+    
 def reloadAllElements():
     insertKnownWebsocketsInGui()
     insertAvailable()
@@ -55,7 +52,7 @@ def insertKnownWebsocketsInGui():
                 # getGuiElement()
             else:
                 # Füge das neue Label hinzu
-                websocket = ctk.CTkButton(scrollbox, text=f"OBS CONNECTION: [{host}, {port}]", fg_color=red_bg, corner_radius=5, text_color=text_color)
+                websocket = ctk.CTkButton(scrollbox, text=f"OBS CONNECTION: [{host}, {port}]", fg_color=color, corner_radius=5, text_color=text_color)
                 websocket.configure(command=lambda btn=websocket: command_center(btn))
                 websocket.pack(anchor="w", pady=(6, 6))
                 # websocket.bind('<Button-1>', command_center)

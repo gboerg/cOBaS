@@ -42,7 +42,14 @@ class Colors(Model):
     hex_text = CharField(default="")
     class Meta: 
         database = db
-
+        
+        
+class KeyBoardEvents(Model):
+    id=AutoField()
+    enter_pressed = BooleanField()
+    class Meta: 
+        database = db
+        
 class websockets(Model):
     id = AutoField()
     name = CharField(default="")
@@ -59,6 +66,6 @@ class websockets(Model):
         # Setze die einzigartige Beschränkung auf die Kombination aus host und port
         unique_together = (('host', 'port'),)
 
-db.create_tables([Features, websockets, Colors, Builder])
+db.create_tables([Features, websockets, Colors, Builder, KeyBoardEvents])
 
 # selected.get_or_create()
