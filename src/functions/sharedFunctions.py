@@ -203,9 +203,8 @@ def checkMainFrame():
 
 
                 dataBaseChange = [
-                    Builder.update({Builder.location: switchingCurrentLocation, Builder.feature: f"{switchingCurrentLocation}+{changingFeatureName}"}).where(Builder.feature == changingDbItemName)
-                    # Builder.update
-                    
+                    Builder.update({Builder.location: switchingCurrentLocation, Builder.feature: f"{switchingCurrentLocation}+{changingFeatureName}"}).where(Builder.feature == changingDbItemName),
+                    Builder.update({Builder.location: changingCurrentLocation, Builder.feature: f"{changingCurrentLocation}+{switchingFeatureName}"}).where(Builder.feature == switchingDbItemName)
                 ]
 
                 # qry = Builder.update({Builder.location: switchingCurrentLocation, Builder.feature: f"{switchingCurrentLocation}+{changingFeatureName}"}).where(Builder.feature == changingDbItemName)
@@ -213,6 +212,7 @@ def checkMainFrame():
                 # qry = Builder.update({Builder.location: switchingNewLocation}).where(Builder.feature == switchingDbItemName)
                 # qry2 = Builder.update({Builder.location: changingNewLocation}).where(Builder.feature == changingDbItemName)
                 for function in dataBaseChange:
+                    l.info(f"FUNCTION SQL: {function}")
                     function.execute()
                 # qry2.execute()
         
@@ -223,22 +223,12 @@ def checkMainFrame():
     
     
     
-    
-    
-def reloadBuilderContent():
-    mainFrame = getGuiElement("main_frame")
-    mainFrameElements = mainFrame.winfo_children()
-
+def rebuildBuilderContent():
     websocket_list = []
     builder_list = []
     feature_list = []
-    
-
-
-    checkMainFrame()
-    destroyMainFrame()
-    
-    
+    mainFrame = getGuiElement("main_frame")
+    mainFrameElements = mainFrame.winfo_children()
     # Alle Daten als Listen sammeln
     for socket in websockets.select():
         websocket_list.append({
@@ -263,10 +253,12 @@ def reloadBuilderContent():
         
         
         
+    sorted_builder_list = sorted(builder_list, key=lambda item: item['location'])
+
 
     
     # Für jeden Builder einen Button erstellen
-    for builder in builder_list:
+    for builder in sorted_builder_list:
         builder_name = builder["key"]
         location = int(builder["location"])
         
@@ -317,10 +309,15 @@ def reloadBuilderContent():
                     db_entry=False
                 )
                 
-                
-                
-def onKeyBoardEnterPress(event):
-    reloadBuilderContent()
+def reloadBuilderContent():
+    mainFrame = getGuiElement("main_frame")
+    mainFrameElements = mainFrame.winfo_children()
 
-    l.info(f"event: {event}")
-    l.warn("enter press detected")
+    
+
+
+    checkMainFrame()
+    destroyMainFrame()
+    rebuildBuilderContent()
+                
+                

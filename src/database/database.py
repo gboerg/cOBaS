@@ -21,10 +21,11 @@ class Features(Model):
 
 
 class Builder(Model):
-    id = AutoField()
+    # id = AutoField()
     all_name  = CharField()
-    feature = CharField(null=True)
-    location = IntegerField(null=True)
+    feature = CharField(primary_key=True)
+    previous_feature= CharField(null= True)
+    location = IntegerField()
     content_kwargs = CharField(null=True)
     format_kwargs = CharField(null = True)
     command = CharField()

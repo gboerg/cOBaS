@@ -9,6 +9,7 @@ from database.database import websockets, Features, Builder
 from functions.getGuiElement import getGuiElement
 from peewee import *
 from optional import Optional
+
 # from events.onKeyBoardEvent import onKeyBoardEnterPress
 # from functions.sharedFunctions import onKeyBoardEnterPress
 
@@ -62,17 +63,31 @@ def generateButtonFrame(all_name, button_name: str, master, text_name, text_colo
         label.pack(padx=(5,5), side = "left")
         button_name.pack(side="right", padx=(5, 5))
         locationLabel_entry = ""
-        if "WebSocket" not in str(text_name): 
-            locationLabel = ctk.CTkLabel(master=frame_name, text="Active Location: ")
-            locationLabel_entry = ctk.CTkEntry(master=frame_name, placeholder_text="New Location")
-            locationLabel.pack(side="left", padx=(5, 5))
-            locationLabel_entry.pack(side="left", padx=(5, 5))
-            # locationLabel_entry.bind("<Return>", onKeyBoardEnterPress)
+        # if "WebSocket" not in str(text_name): 
+        locationLabel = ctk.CTkLabel(master=frame_name, text="Active Location: ")
+        locationLabel_entry = ctk.CTkEntry(master=frame_name, placeholder_text="New Location")
+        locationLabel.pack(side="left", padx=(5, 5))
+        locationLabel_entry.pack(side="left", padx=(5, 5))
+        
+        if "(" in string:
             
-            getGuiElement(f"{location}+{all_name}", locationLabel_entry)
-            # if db_entry == True:
-            #     dbBuilderEntry(all_name=all_name, feature=string, content_kwargs=locationLabel_entry, format_kwargs=[fg_color, text_color], command=[f""], location=location)
-            #     return
+            amount_label = ctk.CTkLabel(master=frame_name, text="Amount: ")
+            amount_label.pack(side="left", padx=(5,5))
+            amount_entry = ctk.CTkEntry(master=frame_name, placeholder_text="unit")
+            amount_entry.pack(side="right", padx=(5,5))
+        else:
+            amount_label = ctk.CTkLabel(master=frame_name, text="SPACER")
+            amount_label.pack(side="left", padx=(5,5))
+            amount_entry = ctk.CTkEntry(master=frame_name, placeholder_text="SPACER", )
+            amount_entry.pack(side="right", padx=(5,5))
+        # amount_entry.bind("<Return>", onKeyBoardEnterPress)
+        # locationLabel_entry.bind("<Return>", onKeyBoardEnterPress)
+        getGuiElement(f"{location}+{all_name}", )
+        getGuiElement(f"{location}+{all_name}", locationLabel_entry)
+        # getGuiElement(f"{location}+{all_name}", amount_entry)
+        # if db_entry == True:
+        #     dbBuilderEntry(all_name=all_name, feature=string, content_kwargs=locationLabel_entry, format_kwargs=[fg_color, text_color], command=[f""], location=location)
+        #     return
         if db_entry == True:
             dbBuilderEntry(all_name=all_name, feature=string, content_kwargs=locationLabel_entry, format_kwargs=[fg_color, text_color], command=[f""], location=location)
         
