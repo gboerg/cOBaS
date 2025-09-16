@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from functions.sharedFunctions import reloadBuilderContent
 from interaction.toggleDarkMode import toggleDarkMode
 from interaction.defaultGUIButtons import connect, reset
 from PIL import Image
@@ -10,7 +11,7 @@ import logging as l
 import os
 # from interaction.commandCenter import mainFrameDBCombare
 
-from functions.sharedFunctions import reloadBuilderContent
+# from functions.sharedFunctions import reloadBuilderContent
 
 l.basicConfig(level=l.INFO)
 class App(ctk.CTk):
