@@ -1,17 +1,16 @@
 import customtkinter as ctk
-from functions.sharedFunctions import reloadBuilderContent
+from events.onKeyBoardEvent import onKeyBoardEnterPress
+# from functions.sharedFunctions import reloadBuilderContent
+from interaction.commandCenter import reloadBuilderContent
 from interaction.toggleDarkMode import toggleDarkMode
 from interaction.defaultGUIButtons import connect, reset
 from PIL import Image
 from database.dataManager import insertKnownWebsocketsInGui, debubVals, insertAvailable
 from functions.getGuiElement import getGuiElement
 from config.IniManager import generateConfig
-from events.onMouseEvent import onDrag, MouseMotion
 import logging as l
 import os
-# from interaction.commandCenter import mainFrameDBCombare
 
-# from functions.sharedFunctions import reloadBuilderContent
 
 l.basicConfig(level=l.INFO)
 class App(ctk.CTk):
@@ -20,34 +19,24 @@ class App(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.setup()
-        self.settingsWheel()
+        self.settings_wheel_image = ctk.CTkImage(
+            dark_image=Image.open("src/assets/images/settings.png"),
+            size=(30, 30)
+        )
         self.create_grid()
         insertKnownWebsocketsInGui()
         debubVals()
         insertAvailable()
         generateConfig()
-        # self.after(5000, self.start_db_check)
-
-    # def start_db_check(self):
-    #     # Your timed function to compare GUI and database
-    #     mainFrameDBCombare()
-
-    #     # Schedule the next check
-    #     self.after(5000, self.start_db_check) 
         
+
     def setup(self):  
         getGuiElement("root", self)
         self.title("cOBaS | OBS WebSocket 5.0 BLDR")
-        # self.geometry("1450x725") 
         self.geometry("1650x825") 
-        # self.resizable(False, False)
 
 
-    def settingsWheel(self):
-        self.settings_wheel_image = ctk.CTkImage(
-            dark_image=Image.open("src/assets/images/settings.png"),
-            size=(30, 30)
-        )
+
 
     def create_grid(self):
         # Zeilengewichtung festlegen
@@ -188,9 +177,9 @@ class App(ctk.CTk):
         name_label = ctk.CTkLabel(self.connect, text="Name",)
         name_label.grid(row=0, column=2, sticky="ew")
 
-
         name_entry = ctk.CTkEntry(self.connect, placeholder_text="obs record ...(optional)")
         name_entry.grid(row=1, column=2, sticky="ew", padx=(10, 10))
+        name_entry.bind("<Return>", lambda event: onKeyBoardEnterPress(eventtype="obs_websocket_connection_name_add_event", event=event))
         getGuiElement("name_entry", name_entry)
         
         # Host-Widgets (zentriert, in Spalte 3)
@@ -199,6 +188,7 @@ class App(ctk.CTk):
 
         host_entry = ctk.CTkEntry(self.connect, placeholder_text="ip-address of target pc")
         host_entry.grid(row=1, column=3, sticky="ew", padx=10)
+        host_entry.bind("<Return>", lambda event: onKeyBoardEnterPress(eventtype="obs_websocket_connection_host_add_event", event=event))
         getGuiElement("host_entry", host_entry)
 
         # Port-Widgets (zentriert, in Spalte 4)
@@ -207,6 +197,7 @@ class App(ctk.CTk):
 
         port_entry = ctk.CTkEntry(self.connect, placeholder_text="port")
         port_entry.grid(row=1, column=4, sticky="ew", padx=10)
+        port_entry.bind("<Return>", lambda event: onKeyBoardEnterPress(eventtype="obs_websocket_connection_port_add_event", event=event))
         getGuiElement("port_entry", port_entry)
 
         # Password-Widgets (zentriert, in Spalte 5)
@@ -217,10 +208,12 @@ class App(ctk.CTk):
 
         password_entry = ctk.CTkEntry(self.connect, placeholder_text="password", show="*")
         password_entry.grid(row=1, column=5, sticky="ew", padx=(10, 10))
+        password_entry.bind("<Return>", lambda event: onKeyBoardEnterPress(eventtype="obs_websocket_connection_password_add_event", event=event))
         getGuiElement("password_entry", password_entry)
         
         # Connect Button (ganz rechts, in Spalte 7)
         connect_button = ctk.CTkButton(self.connect, text="Connect", hover_color="purple", command= connect)
+
         getGuiElement("connect_button", connect_button)
         connect_button.grid(row=1, column=7, sticky="e", padx=(0, 0))
         
@@ -241,6 +234,7 @@ class App(ctk.CTk):
         
         self.content.grid_rowconfigure(0, weight=0)
         self.content.grid_rowconfigure(1, weight=1)
+        self.content.grid_rowconfigure(2, weight=0)
         self.content.grid_rowconfigure(3, weight=0)
         
 
@@ -249,18 +243,16 @@ class App(ctk.CTk):
         content_label.grid(row=0, column= 1)
         
         clear_Button = ctk.CTkButton(self.content, text="Clear Script", command=reset)
-        clear_Button.grid(row=2, column=1, padx=(5, 5))
+        clear_Button.grid(row=2, column=2)
         
-        # reload_builder_button = ctk.CTkButton(self.content, text="Reload / RESTORE", command=reloadBuilderContent)
-        reload_builder_button = ctk.CTkButton(self.content, text="Reload / RESTORE", command=reloadBuilderContent)
+        reload_builder_button = ctk.CTkButton(self.content, text="Reload / RESTORE / APPLY ORDER", command=reloadBuilderContent)
+        # reload_builder_button = ctk.CTkButton(self.content, text="Reload / RESTORE / APPLY ORDER",)
         reload_builder_button.grid(row=0, column=4)
 
         mainFrame = self.contentScroll = ctk.CTkScrollableFrame(self.content)
         mainFrameGrid = self.contentScroll.grid(row=1, column=0, columnspan=6, rowspan= 1, padx=10, pady=10, sticky="news")
 
-        # MouseMotion(conntentFrame)
-        contentFrame.bind("<Enter>", MouseMotion)
-        contentFrame.bind("<Leave>", MouseMotion)
+
     
 
         getGuiElement("main_frame", mainFrame)
@@ -284,7 +276,7 @@ class App(ctk.CTk):
 
 
 
-        footer_label = ctk.CTkLabel(self.footer, text="Made by Jan Gerstenberg @gboergIndustries with LOVE", )
+        footer_label = ctk.CTkLabel(self.footer, text="Made by Jan Gerstenberg @gboergIndustries with LOVE <3 twitch.tv/bycoba", )
         footer_label.grid(row= 1, column =1, sticky="w")
         # footer_label.pack(padx =20, pady= 20)
 

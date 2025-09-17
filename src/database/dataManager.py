@@ -2,14 +2,10 @@ from database.database import websockets, Features, Builder
 from functions.getGuiElement import getGuiElement
 from matplotlib_colors import colormap_names
 from interaction.commandCenter import command_center
-# from interaction.buttonInteraction import command_center
+from events.onMouseEvent import onMouseRightClick
 
 import customtkinter as ctk
 import logging as l
-import colorsys
-import colorsys
-import random
-import matplotlib.colors as mcolors
 
 
     
@@ -45,6 +41,7 @@ def insertKnownWebsocketsInGui():
                 websocket_name = ctk.CTkButton(scrollbox, text=f"WebSocket: {name} | Host: {host} | Port: {port}", fg_color=color, corner_radius=5, text_color=text_color)
                 websocket_name.configure(command=lambda btn=websocket_name: command_center(btn))
                 websocket_name.pack(anchor="w", pady=(6, 6))
+                websocket_name.bind("<Button-3>", onMouseRightClick)
                 # websocket_name.bind('<B1-Motion>', onDrag)
                 # websocket_name.bind("<ButtonRelease-1>", onDrop)
                 # websocket_name.bind('<Button-1>', command_center)
@@ -55,6 +52,7 @@ def insertKnownWebsocketsInGui():
                 websocket = ctk.CTkButton(scrollbox, text=f"OBS CONNECTION: [{host}, {port}]", fg_color=color, corner_radius=5, text_color=text_color)
                 websocket.configure(command=lambda btn=websocket: command_center(btn))
                 websocket.pack(anchor="w", pady=(6, 6))
+                websocket.bind("<Button-3>", onMouseRightClick)
                 # websocket.bind('<Button-1>', command_center)
                 # websocket.bind('Button-3', command_center)
                 # websocket.bind("<B1-Motion>", onDrag)
