@@ -50,6 +50,9 @@ class Colors(Model):
 class websockets(Model):
     id = AutoField()
     name = CharField(default="")
+    connection_from = CharField(null=True)
+    connection_last_test = CharField(null=True)
+    connection_successfull = BooleanField(null=True)
     host = CharField()
     port = IntegerField()
     password = CharField()

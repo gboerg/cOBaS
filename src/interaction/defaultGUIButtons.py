@@ -9,6 +9,7 @@ import random
 import matplotlib.colors as mcolors
 from matplotlib_colors import colormap_names
 import customtkinter as ctk
+from obs.testConnection import testObsWebSocketConnection
 
 
 from database.database import websockets, Features, Builder
@@ -106,36 +107,50 @@ def connect():
                 red_bg= "white"
                 red_text = "black"
                 
-                all_field_string = f'WebSocket: {name} | Host: {host} | Port: {port}'
-                #TODO: Same websocket Dectection
-                result = websockets.select().where(websockets.all_field == all_field_string)
-                result2 = websockets.select().where((websockets.port == port) & (websockets.password == passw) & (websockets.host == host))
-                l.info(f"WEBSOCKET DB CHECK2 {result2}")
-                # if not all([result, result2]):
-                if not result and not result2:
-                    # Verwende get_or_create, um das Objekt zu finden oder zu erstellen
-                    entry, created = websockets.get_or_create(
-                        host=host, 
-                        port=port_int, 
-                        name= name,
-                        all_field= all_field_string,
-                        defaults={'name':name,'password':passw},
-                        color = red_bg,
-                        text_color= red_text
-                        
-                    )
-                    if created:
-                        l.info("Neuer Eintrag in der Datenbank erstellt.")
-                        insertKnownWebsocketsInGui()
-                        guiElement.configure(text="Connected")
-                    elif not created:
-                        pass
-                else:
-                    l.info("same websocket is not allowed")
-                    l.warning("Eintrag existiert bereits. Kein neuer Eintrag in DB oder GUI.")
-                    guiElement.configure(text="Already Exists")
-                    guiElement.after(5000, lambda: guiElement.configure(text="Connect"))
                 
+                version = testObsWebSocketConnection(host=host, port=port, password=passw) 
+                
+                l.info(f"OBS VERSION CONN REQ: {version}")
+                
+                # Check for the specific failure string
+                if version == "No Response from OBS":
+                    # Change the button text
+                    guiElement.configure(text=version) 
+                    return
+                
+                if "OBS" in version:
+                    all_field_string = f'WebSocket: {name} | Host: {host} | Port: {port}'
+                    #TODO: Same websocket Dectection
+                    result = websockets.select().where(websockets.all_field == all_field_string)
+                    result2 = websockets.select().where((websockets.port == port) & (websockets.password == passw) & (websockets.host == host))
+                    l.info(f"WEBSOCKET DB CHECK2 {result2}")
+                    # if not all([result, result2]):
+                    if not result and not result2:
+                        # Verwende get_or_create, um das Objekt zu finden oder zu erstellen
+                        entry, created = websockets.get_or_create(
+                            host=host, 
+                            port=port_int, 
+                            name= name,
+                            all_field= all_field_string,
+                            defaults={'name':name,'password':passw},
+                            color = red_bg,
+                            text_color= red_text
+                            
+                        )
+                        if created:
+                            l.info("Neuer Eintrag in der Datenbank erstellt.")
+                            insertKnownWebsocketsInGui()
+                            guiElement.configure(text="Connected")
+                        elif not created:
+                            pass
+                    else:
+                        l.info("same websocket is not allowed")
+                        l.warning("Eintrag existiert bereits. Kein neuer Eintrag in DB oder GUI.")
+                        guiElement.configure(text="Already Exists")
+                        guiElement.after(5000, lambda: guiElement.configure(text="Connect"))
+                elif not "OBS" in version: 
+                    guiElement.configure(text="NO RESPONSE FROM OBS")
+                    guiElement.after(5000, lambda: guiElement.configure(text="Connect"))
 
             except ValueError:
                 l.error("Fehler: Port-Wert ist keine gültige Zahl.")
