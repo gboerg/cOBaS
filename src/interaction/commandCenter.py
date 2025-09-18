@@ -9,7 +9,7 @@ from database.database import websockets, Features, Builder
 from events.onKeyBoardEvent import onKeyBoardEnterPress
 from functions.getGuiElement import getGuiElement
 from peewee import *
-from optional import Optional
+from typing import Optional
 
 # from functions.sharedFunctions import reloadBuilderContent
 
@@ -20,41 +20,29 @@ from optional import Optional
 
 
 
-def dbBuilderEntry(all_name, feature, content_kwargs: ctk, format_kwargs, command, location):
-    # Korrekte Prüfung ob Tabelle leer ist
-    # pass
-    # return
-    content_kwargs
-    format_kwargs
+def dbBuilderEntry(name, location, value: Optional[any]= None, value2: Optional[any]= None, value3: Optional[any]= None, value4: Optional[any]= None, value5: Optional[any]= None):
+
     if not Builder.select().exists():
         l.info("nothing in builder")
-        new_string = f"{location}+{all_name}"
+        new_string = f"{location}+{name}"
         
         Builder.get_or_create(
-            all_name  = all_name,
             feature = new_string, 
-            # content_kwargs = content_kwargs,
-            # format_kwargs = format_kwargs,
+            name  = name,
             location = location,
-            command = command
+            
         )
     elif Builder.select():
-        # Höchste Location finden und inkrementieren
-        # max_location_entry = Builder.select().order_by(Builder.location.desc()).first()
-        # new_location = max_location_entry.location + 1
-        
-        # l.info(f"Entry detected placing new one at location: {new_location}")
-        new_string = f"{location}+{all_name}"
+
+        new_string = f"{location}+{name}"
         Builder.get_or_create(
-            all_name  = all_name,
             feature = new_string,
-            # content_kwargs = content_kwargs,
-            # format_kwargs = format_kwargs,
+            name  = name,
+
             location = location,
-            command = command
         )
 
-def generateButtonFrame(all_name, button_name: str, master, text_name, text_color, fg_color, location: int, db_entry: bool):
+def generateButtonFrame(name, button_name: str, master, text_name, text_color, fg_color, location: int, db_entry: bool):
     try:
         # TODO: CREATE GRID "DYNAMIC" ELEMENT
         frame_name = ctk.CTkFrame(master)
@@ -110,7 +98,7 @@ def generateButtonFrame(all_name, button_name: str, master, text_name, text_colo
                 # Extrahieren Sie den Wert aus der Spalte content_kwargs
                 # Dieser Wert muss in einen String umgewandelt werden,
                 # um ihn im Label zu verwenden
-                current_amount_value = str(builder_instance.content_kwargs)
+                current_amount_value = str(builder_instance.value)
                 
             except Builder.DoesNotExist:
                 # Falls kein Datensatz gefunden wird, bleibt der Standardwert "0"
@@ -132,17 +120,17 @@ def generateButtonFrame(all_name, button_name: str, master, text_name, text_colo
             
             amount_entry.bind("<Return>", onKeyBoardEnterPress)
             
-        getGuiElement(f"{location}current_amount{all_name}", currentAmount)
-        getGuiElement(f"{location}amount_entry{all_name}", amount_entry)
-        getGuiElement(f"{location}+{all_name}", location_entry)
+        getGuiElement(f"{location}current_amount{name}", currentAmount)
+        getGuiElement(f"{location}amount_entry{name}", amount_entry)
+        getGuiElement(f"{location}+{name}", location_entry)
         
         if db_entry == True:
-            dbBuilderEntry(all_name=all_name, feature=string, content_kwargs="", format_kwargs=[fg_color, text_color], command=[f""], location=location)
+            dbBuilderEntry(name=name, location=location)
         
     except Exception as e:
         l.error(f"Error in generateButtonFrame: {e}")
 
-def generateSwitchFrame(all_name, button_name: str, master, text_name, text_color, fg_color, switch_text_1, switch_text_2, obs_values, obs_to_values, location: int, db_entry: bool):
+def generateSwitchFrame(name, button_name: str, master, text_name, text_color, fg_color, switch_text_1, switch_text_2, obs_values, obs_to_values, location: int, db_entry: bool):
     try:
         obs_switch_frame = ctk.CTkFrame(master)
         obs_switch_frame.pack(pady=(5, 5))
@@ -217,7 +205,7 @@ def command_center(event: ctk.CTkButton):
                 new_text = f1.lstrip()
                 l.info(f"Text [{new_text}]")
                 
-                delete = Builder.delete().where(Builder.all_name == new_text)
+                delete = Builder.delete().where(Builder.name == new_text)
                 delete.execute()
                 l.info(f"Datensatz gelöscht: {delete}")
                 
@@ -233,7 +221,7 @@ def command_center(event: ctk.CTkButton):
         
     if socketSingleDb and not "Active" in text:
         
-        
+        l.info(f" The text: {text}")
         for each in mainFrameElements:
             if isinstance(each, (ctk.CTkLabel)):
                 request = each.cget("text")
@@ -244,7 +232,7 @@ def command_center(event: ctk.CTkButton):
 
         
         
-        if Builder.select().where(Builder.all_name == text):
+        if Builder.select().where(Builder.feature == text):
             warning = ctk.CTkLabel(mainFrame, text="ERROR: WEBSOCKET ALREADY ACTIVE!", fg_color="red", corner_radius=8)
             warning.pack(pady=(5,5))
             l.info("CANCEL NO WEBSOCKET")
@@ -255,7 +243,7 @@ def command_center(event: ctk.CTkButton):
             
             
             
-        elif not Builder.select().where(Builder.all_name ==text) :
+        elif not Builder.select().where(Builder.feature ==text) :
             count = Builder.select().count()
             if count:
                 generateButtonFrame(text, text, mainFrame, text, text_color, fg_color, count, True)
@@ -271,7 +259,7 @@ def command_center(event: ctk.CTkButton):
         
     if featureSingleDb and not "Active" in text: 
         
-        if Builder.select().where(Builder.all_name.contains("WebSocket")):
+        if Builder.select().where(Builder.feature.contains("WebSocket")):
             
         
             if "OBS" and not "[" in text:
@@ -297,7 +285,7 @@ def command_center(event: ctk.CTkButton):
                 
         else:
             warning = ctk.CTkLabel(mainFrame, text="ERROR: SELECT WEBSOCKET FIRST!", fg_color="red", corner_radius=8)
-            warning.pack(pady=(5,5))
+            # warning.pack(pady=(5,5))
             l.info("CANCEL NO WEBSOCKET")
         
         
@@ -319,7 +307,6 @@ def rebuildBuilderContent():
         builder_list.append({
             "key": script.feature,
             "location": script.location,
-            "content_kwargs": script.content_kwargs
         })
     
     for feature in Features.select():
@@ -347,16 +334,16 @@ def rebuildBuilderContent():
             if builder_name in socket["key"] or socket["key"] in builder_name:  # ← CONTAINS!
                 # l.info(f"Match: '{builder_name}' <-> '{socket['key']}'")
                 
-                alln = Builder.select().where(Builder.all_name == builder_name)
+                alln = Builder.select().where(Builder.name == builder_name)
                 name = Builder.select().where(Builder.feature.contains(builder_name))
                 
                 for each in name:
-                    # l.info(f"counter check: {each.all_name}")
-                    builder_name = each.all_name
+                    # l.info(f"counter check: {each.name}")
+                    builder_name = each.name
                     
                 
                 generateButtonFrame(
-                    all_name=f"{alln}",
+                    name=f"{alln}",
                     button_name=builder_name,
                     master=mainFrame,
                     text_color=socket["text_color"],
@@ -377,7 +364,7 @@ def rebuildBuilderContent():
                 generateButtonFrame(
                     
                     
-                    all_name=f"{builder_name}",
+                    name=f"{builder_name}",
                     button_name=builder_name,
                     master=mainFrame,
                     text_color=feature["text_color"],
@@ -400,7 +387,7 @@ def checkMainFrame():
     
     for entry in content:
         combined_name = entry.feature
-        feature = entry.all_name
+        feature = entry.name
         location = entry.location
         
         
@@ -421,20 +408,12 @@ def checkMainFrame():
                     name = currentLocationItem["key"]
                     feature = currentLocationItem["feature"]
                     location = currentLocationItem["location"]
-
                     locationWidget = getGuiElement(f"{name}")
 
                     if not locationWidget:
                         continue
-                    
-                    
-                    location_value = locationWidget.get()
 
-                    # l.info(f"NACHVOLLZUG: {name}")
-                    # valueCenter = Builder.get(Builder.content_kwargs==)
-                    
-                    
-                    # Builder.update(Builder.content_kwargs)
+                    location_value = locationWidget.get()
 
                     
                     mainFrameItemLocationList.append({
@@ -446,9 +425,7 @@ def checkMainFrame():
         except Exception as e:
             l.warn(f"ERROR DURING MAINFRAME LIST CREATION: {e}")
             
-    # l.info(f"Database Location Checker: {currentLocationList}")
-    # l.info(f"Location entry checker: {mainFrameItemLocationList}")
-            
+
     
     
     
@@ -478,7 +455,7 @@ def checkMainFrame():
                     getItemOnNewLocation = Builder.select().where(Builder.location == desired_location)
                     for each in getItemOnNewLocation:
                         switch_to = each.location
-                        featureRawNameOnNewLocation = each.all_name
+                        featureRawNameOnNewLocation = each.name
                         elementOnNewLocationCombinedName = each.feature
                         # l.info(f"Switch location {switch_to} and name: {featureRawNameOnNewLocation} | Combined Name: {elementOnNewLocationCombinedName}")
                         
@@ -507,7 +484,7 @@ def checkMainFrame():
     # NOTE: FINAL COMPARE LOOP AND DATABASE ENTRY CHANGE
     for compare in content:
         combined_name = compare.feature
-        feature = compare.all_name
+        feature = compare.name
         location = compare.location
         
         for key in newFrameDict:

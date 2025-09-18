@@ -26,7 +26,7 @@ def onMouseRightClick(event: ctk.CTkBaseClass):
     # confirmActionWindow().attributes("-topmost", True)
     # confirmActionWindow().transient()
     dbOverwrite = [
-        Builder.delete().where(Builder.all_name.contains(text)),
+        Builder.delete().where(Builder.name.contains(text)),
         websockets.delete().where(websockets.all_field.contains(text))
     ]
     

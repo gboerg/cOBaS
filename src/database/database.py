@@ -22,14 +22,16 @@ class Features(Model):
 
 class Builder(Model):
     # id = AutoField()
-    all_name  = CharField()
     feature = CharField(primary_key=True)
+    name  = CharField()
     previous_feature= CharField(null= True)
     location = IntegerField()
-    content_kwargs = CharField(null=True)
-    format_kwargs = CharField(null = True)
-    command = CharField()
-
+    
+    value = CharField(null=True)
+    value2 = CharField(null = True)
+    value3 = CharField(null = True)
+    value4 = CharField(null = True)
+    value5 = CharField(null = True)
 
     class Meta: 
         database = db
