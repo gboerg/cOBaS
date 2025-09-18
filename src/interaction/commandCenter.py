@@ -56,47 +56,88 @@ def dbBuilderEntry(all_name, feature, content_kwargs: ctk, format_kwargs, comman
 
 def generateButtonFrame(all_name, button_name: str, master, text_name, text_color, fg_color, location: int, db_entry: bool):
     try:
-        
-        
         # TODO: CREATE GRID "DYNAMIC" ELEMENT
         frame_name = ctk.CTkFrame(master)
-        frame_name.pack(pady=(5, 5))
-        # frame_name.grid(pady = (5,5))
+        frame_name.grid(pady=(10,10), sticky="ew")
+
+                    
+
+        frame_name.grid_columnconfigure(0, weight=0)  # Label
+        frame_name.grid_columnconfigure(1, weight=0)  # Spacer
+        frame_name.grid_columnconfigure(2, weight=0)  # LocationLabel
+        frame_name.grid_columnconfigure(3, weight=0)  # Location Entry
+        frame_name.grid_columnconfigure(4, weight=0)  # Button
+        frame_name.grid_columnconfigure(5, weight=1)  # SPACER COLUMN - This ensures consistent spacing
+        frame_name.grid_columnconfigure(6, weight=0)  # Amount Label
+        frame_name.grid_columnconfigure(7, weight=0)  # Amount Entry
+        frame_name.grid_columnconfigure(8, weight=0)  # Amount Entry
+        frame_name.grid_columnconfigure(9, weight=0)  
         string = str(button_name)  
 
         button_name = ctk.CTkButton(master=frame_name, text=f"Active {str(text_name)}", fg_color=fg_color, text_color=text_color, hover_color="purple")
         button_name.configure(command=lambda btn=button_name: command_center(btn))
-        label = ctk.CTkLabel(frame_name, text=location)
-        label.pack(padx=(5,5), side = "left")
-        button_name.pack(side="right", padx=(5, 5))
-        locationLabel_entry = ""
-        amount_entry = ""
-        # if "WebSocket" not in str(text_name): 
-        locationLabel = ctk.CTkLabel(master=frame_name, text="Active Location: ")
-        locationLabel_entry = ctk.CTkEntry(master=frame_name, placeholder_text="New Location")
-        locationLabel.pack(side="left", padx=(5, 5))
-        locationLabel_entry.pack(side="left", padx=(5, 5))
-        locationLabel_entry.bind("<Return>", onKeyBoardEnterPress)
+        button_name.grid(row=0, column=9, padx=5, sticky="w")  # Changed to sticky="w" for left alignment
         
+        label = ctk.CTkLabel(frame_name, text=location)
+        label.grid(row=0, column=0, padx=5, sticky="w")
+        
+        location_entry = ""
+        amount_entry = ""
+        currentAmount =""
+        
+        locationLabel = ctk.CTkLabel(master=frame_name, text="New Location: ")
+        location_entry = ctk.CTkEntry(master=frame_name, placeholder_text="New Location")
+        
+        locationLabel.grid(row=0, column=2, padx=(10, 0))  # Added padding for spacing
+        location_entry.grid(row=0, column=3, padx=(5, 10))
+        
+        location_entry.bind("<Return>", onKeyBoardEnterPress)
         if "(" in string:
             
-            amount_label = ctk.CTkLabel(master=frame_name, text="Amount: ")
-            amount_label.pack(side="left", padx=(5,5))
-            amount_entry = ctk.CTkEntry(master=frame_name, placeholder_text="unit")
-            amount_entry.pack(side="right", padx=(5,5))
-            amount_entry.bind("<Return>", onKeyBoardEnterPress)
-        else:
-            SPACER = ctk.CTkLabel(master=frame_name, text="SPACER")
-            SPACER.pack(side="left", padx=(5,5))
-            SPACER_ENTRY = ctk.CTkEntry(master=frame_name, placeholder_text="SPACER", )
-            SPACER_ENTRY.pack(side="right", padx=(5,5))
+  
+            #TODO: AMOUNT INSERT LABEL
+            search = f"{location}+{string}" 
             
-        getGuiElement(f"{location}amount{all_name}", amount_entry)
-        getGuiElement(f"{location}+{all_name}", locationLabel_entry)
+            l.info(f"DATABASE SEARCH STRING : {search}")
+            
+            # ----- WICHTIGER NEUER ABSCHNITT -----
+            # Verwenden von .get(), um den Wert direkt aus der Datenbank zu holen
+            current_amount_value = "0"  # Standardwert, falls nichts gefunden wird
+            try:
+                # Führen Sie die Abfrage aus, um ein einzelnes Ergebnis zu erhalten
+                builder_instance = Builder.get(Builder.feature == search)
+                
+                # Extrahieren Sie den Wert aus der Spalte content_kwargs
+                # Dieser Wert muss in einen String umgewandelt werden,
+                # um ihn im Label zu verwenden
+                current_amount_value = str(builder_instance.content_kwargs)
+                
+            except Builder.DoesNotExist:
+                # Falls kein Datensatz gefunden wird, bleibt der Standardwert "0"
+                l.warning(f"Kein passender Datensatz für '{search}' gefunden.")
+            
+            # ----- ENDE DES NEUEN ABSCHNITTS -----
+            
+            currentAmount = ctk.CTkLabel(master=frame_name, text=current_amount_value)
+            currentAmount.grid(row=0, column=6, sticky="w", padx=(5,5))
+            
+                
+            
+            
+            amount_label = ctk.CTkLabel(master=frame_name, text="Amount: ")
+            amount_label.grid(row=0, column=7, sticky="w", padx=(0, 5))
+            
+            amount_entry = ctk.CTkEntry(master=frame_name, placeholder_text="unit")
+            amount_entry.grid(row=0, column=8, sticky="ew", padx=(0, 5))
+            
+            amount_entry.bind("<Return>", onKeyBoardEnterPress)
+            
+        getGuiElement(f"{location}current_amount{all_name}", currentAmount)
+        getGuiElement(f"{location}amount_entry{all_name}", amount_entry)
+        getGuiElement(f"{location}+{all_name}", location_entry)
         
-
         if db_entry == True:
-            dbBuilderEntry(all_name=all_name, feature=string, content_kwargs=locationLabel_entry, format_kwargs=[fg_color, text_color], command=[f""], location=location)
+            dbBuilderEntry(all_name=all_name, feature=string, content_kwargs="", format_kwargs=[fg_color, text_color], command=[f""], location=location)
         
     except Exception as e:
         l.error(f"Error in generateButtonFrame: {e}")
@@ -382,21 +423,13 @@ def checkMainFrame():
                     location = currentLocationItem["location"]
 
                     locationWidget = getGuiElement(f"{name}")
-                    if "(" in name:
-                        amountWidget = getGuiElement(f"{location}amount{feature}")
-                    else:
-                        amountWidget = locationWidget
-                    
-                    l.info(f"Location Widget: {locationWidget} ")
-                    l.info(f"amount widget: {amountWidget}")
-                    
+
                     if not locationWidget:
                         continue
                     
                     
-                    amount_value = amountWidget.get()
                     location_value = locationWidget.get()
-                    l.info(f"Amount: {amount_value}")
+
                     # l.info(f"NACHVOLLZUG: {name}")
                     # valueCenter = Builder.get(Builder.content_kwargs==)
                     
@@ -408,7 +441,6 @@ def checkMainFrame():
                         "key": name,
                         "now_location": location,
                         "desired_location": location_value,
-                        "amount_value": amount_value
                     })
 
         except Exception as e:
