@@ -56,22 +56,27 @@ def dbBuilderEntry(all_name, feature, content_kwargs: ctk, format_kwargs, comman
 
 def generateButtonFrame(all_name, button_name: str, master, text_name, text_color, fg_color, location: int, db_entry: bool):
     try:
+        
+        
+        # TODO: CREATE GRID "DYNAMIC" ELEMENT
         frame_name = ctk.CTkFrame(master)
         frame_name.pack(pady=(5, 5))
-        
+        # frame_name.grid(pady = (5,5))
         string = str(button_name)  
 
-        button_name = ctk.CTkButton(master=frame_name, text=f"Active {str(text_name)}", fg_color=fg_color, text_color=text_color)
+        button_name = ctk.CTkButton(master=frame_name, text=f"Active {str(text_name)}", fg_color=fg_color, text_color=text_color, hover_color="purple")
         button_name.configure(command=lambda btn=button_name: command_center(btn))
         label = ctk.CTkLabel(frame_name, text=location)
         label.pack(padx=(5,5), side = "left")
         button_name.pack(side="right", padx=(5, 5))
         locationLabel_entry = ""
+        amount_entry = ""
         # if "WebSocket" not in str(text_name): 
         locationLabel = ctk.CTkLabel(master=frame_name, text="Active Location: ")
         locationLabel_entry = ctk.CTkEntry(master=frame_name, placeholder_text="New Location")
         locationLabel.pack(side="left", padx=(5, 5))
         locationLabel_entry.pack(side="left", padx=(5, 5))
+        locationLabel_entry.bind("<Return>", onKeyBoardEnterPress)
         
         if "(" in string:
             
@@ -81,19 +86,15 @@ def generateButtonFrame(all_name, button_name: str, master, text_name, text_colo
             amount_entry.pack(side="right", padx=(5,5))
             amount_entry.bind("<Return>", onKeyBoardEnterPress)
         else:
-            amount_label = ctk.CTkLabel(master=frame_name, text="SPACER")
-            amount_label.pack(side="left", padx=(5,5))
-            amount_entry = ctk.CTkEntry(master=frame_name, placeholder_text="SPACER", )
-            amount_entry.pack(side="right", padx=(5,5))
+            SPACER = ctk.CTkLabel(master=frame_name, text="SPACER")
+            SPACER.pack(side="left", padx=(5,5))
+            SPACER_ENTRY = ctk.CTkEntry(master=frame_name, placeholder_text="SPACER", )
+            SPACER_ENTRY.pack(side="right", padx=(5,5))
             
-        locationLabel_entry.bind("<Return>", onKeyBoardEnterPress)
-        getGuiElement(f"{location}+{all_name}", )
+        getGuiElement(f"{location}amount{all_name}", amount_entry)
         getGuiElement(f"{location}+{all_name}", locationLabel_entry)
         
-        # getGuiElement(f"{location}+{all_name}", amount_entry)
-        # if db_entry == True:
-        #     dbBuilderEntry(all_name=all_name, feature=string, content_kwargs=locationLabel_entry, format_kwargs=[fg_color, text_color], command=[f""], location=location)
-        #     return
+
         if db_entry == True:
             dbBuilderEntry(all_name=all_name, feature=string, content_kwargs=locationLabel_entry, format_kwargs=[fg_color, text_color], command=[f""], location=location)
         
@@ -351,7 +352,7 @@ def checkMainFrame():
     currentLocationList = []
     mainFrameItemLocationList = []
     newFrameDict = {}
-    
+    # l.warn("CHECKMAINFRAME STARTET")
     
     content = Builder.select()
     # l.info(f"Content: {content}")
@@ -377,21 +378,41 @@ def checkMainFrame():
                 
                 for currentLocationItem in currentLocationList:
                     name = currentLocationItem["key"]
+                    feature = currentLocationItem["feature"]
                     location = currentLocationItem["location"]
 
-                    r_widget = getGuiElement(f"{name}")
-                    if not r_widget:
+                    locationWidget = getGuiElement(f"{name}")
+                    if "(" in name:
+                        amountWidget = getGuiElement(f"{location}amount{feature}")
+                    else:
+                        amountWidget = locationWidget
+                    
+                    l.info(f"Location Widget: {locationWidget} ")
+                    l.info(f"amount widget: {amountWidget}")
+                    
+                    if not locationWidget:
                         continue
-                    entry_value = r_widget.get()
+                    
+                    
+                    amount_value = amountWidget.get()
+                    location_value = locationWidget.get()
+                    l.info(f"Amount: {amount_value}")
+                    # l.info(f"NACHVOLLZUG: {name}")
+                    # valueCenter = Builder.get(Builder.content_kwargs==)
+                    
+                    
+                    # Builder.update(Builder.content_kwargs)
 
+                    
                     mainFrameItemLocationList.append({
                         "key": name,
                         "now_location": location,
-                        "desired_location": entry_value 
+                        "desired_location": location_value,
+                        "amount_value": amount_value
                     })
 
         except Exception as e:
-            l.error(f"Error in checkMainFrame: {e}")
+            l.warn(f"ERROR DURING MAINFRAME LIST CREATION: {e}")
             
     # l.info(f"Database Location Checker: {currentLocationList}")
     # l.info(f"Location entry checker: {mainFrameItemLocationList}")

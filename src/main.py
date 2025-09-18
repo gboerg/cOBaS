@@ -3,13 +3,18 @@ from events.onKeyBoardEvent import onKeyBoardEnterPress
 # from functions.sharedFunctions import reloadBuilderContent
 from interaction.commandCenter import reloadBuilderContent
 from interaction.toggleDarkMode import toggleDarkMode
-from interaction.defaultGUIButtons import connect, reset
+from interaction.defaultGUIButtons import connect, reset, clearWindow
 from PIL import Image
 from database.dataManager import insertKnownWebsocketsInGui, debubVals, insertAvailable
 from functions.getGuiElement import getGuiElement
-from config.IniManager import generateConfig
+from config.configManager import generateConfig
 import logging as l
 import os
+from PIL import Image
+import pywinstyles
+
+
+
 
 
 l.basicConfig(level=l.INFO)
@@ -28,13 +33,16 @@ class App(ctk.CTk):
         debubVals()
         insertAvailable()
         generateConfig()
-        
+        reloadBuilderContent()
+
 
     def setup(self):  
         getGuiElement("root", self)
+        self.iconbitmap()
         self.title("cOBaS | OBS WebSocket 5.0 BLDR")
-        self.geometry("1650x825") 
-
+        self.geometry("1750x825") 
+        self.iconbitmap("src/assets/images/coba.ico")
+   
 
 
 
@@ -61,6 +69,7 @@ class App(ctk.CTk):
 
     # In your App class (within main.py)
     def navbar_frame(self):
+        # pywinstyles.apply_style(self, style="optimised" )
         self.navbar = ctk.CTkFrame(self)
         self.navbar.grid(row=0, column=0, columnspan=3, padx=10, pady=10, sticky="news")
 
@@ -228,8 +237,8 @@ class App(ctk.CTk):
 
         self.content.grid_columnconfigure(0, weight=1)
         self.content.grid_columnconfigure(1, weight=0)
-        self.content.grid_columnconfigure(2, weight=0)
-        self.content.grid_columnconfigure(3, weight=1)
+        self.content.grid_columnconfigure(2, weight=1)
+        self.content.grid_columnconfigure(3, weight=0)
         self.content.grid_columnconfigure(4, weight=0)
         
         self.content.grid_rowconfigure(0, weight=0)
@@ -237,17 +246,16 @@ class App(ctk.CTk):
         self.content.grid_rowconfigure(2, weight=0)
         self.content.grid_rowconfigure(3, weight=0)
         
-
         # content_label = ctk.CTkLabel(self.content, text= "Graphical Drag N' Drop Script Builder: [ORIENTATION GUIDE] Up -> Down or Left -> Right")
         content_label = ctk.CTkLabel(self.content, text= "Script Builder:")
         content_label.grid(row=0, column= 1)
         
-        clear_Button = ctk.CTkButton(self.content, text="Clear Script", command=reset)
-        clear_Button.grid(row=2, column=2)
+
+
+
         
-        reload_builder_button = ctk.CTkButton(self.content, text="Reload / RESTORE / APPLY ORDER", command=reloadBuilderContent)
-        # reload_builder_button = ctk.CTkButton(self.content, text="Reload / RESTORE / APPLY ORDER",)
-        reload_builder_button.grid(row=0, column=4)
+        
+        
 
         mainFrame = self.contentScroll = ctk.CTkScrollableFrame(self.content)
         mainFrameGrid = self.contentScroll.grid(row=1, column=0, columnspan=6, rowspan= 1, padx=10, pady=10, sticky="news")
@@ -257,7 +265,6 @@ class App(ctk.CTk):
 
         getGuiElement("main_frame", mainFrame)
         getGuiElement("content_frame", contentFrame)
-        getGuiElement("reload_button", reload_builder_button)
 
         
 
@@ -276,9 +283,27 @@ class App(ctk.CTk):
 
 
 
-        footer_label = ctk.CTkLabel(self.footer, text="Made by Jan Gerstenberg @gboergIndustries with LOVE <3 twitch.tv/bycoba", )
+        footer_label = ctk.CTkLabel(self.footer, text="Made by Jan Gerstenberg @gboergIndustries with LOVE <3 twitch.tv/bycoba | cOBaS: AlphaV1", )
         footer_label.grid(row= 1, column =1, sticky="w")
         # footer_label.pack(padx =20, pady= 20)
+
+        button_frame = ctk.CTkFrame(self.footer, fg_color="transparent")
+        button_frame.grid(row=1, column=1, sticky="e")
+        
+        reload_builder_button = ctk.CTkButton(button_frame, text="Reload / RESTORE / APPLY ORDER", hover_color="purple", command=reloadBuilderContent)
+        # reload_builder_button.grid(row=3, column=4, sticky="e")
+        reload_builder_button.pack(side="left")
+        getGuiElement("reload_button", reload_builder_button)
+        clear_Button = ctk.CTkButton(button_frame, text="PERMA DELETE SCRIPT", hover_color="purple", command=reset)
+        clear_Button.pack(side="right", )
+        # clear_Button.grid(row=3, column=4, sticky="e")
+ 
+        clear_script_window = ctk.CTkButton(button_frame, text="Clear Window", hover_color="purple", command=clearWindow)
+        # clear_script_window.grid(row=3, column=3, sticky="e")
+        clear_script_window.pack(side= "left",padx=(5,5))
+        
+
+
 
         run_button = ctk.CTkButton(self.footer, text="RUN", hover_color="purple")
         run_button.grid(row=1, column=2, sticky="e", padx="5")

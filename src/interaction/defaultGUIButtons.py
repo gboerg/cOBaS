@@ -30,6 +30,11 @@ def reset():
         Builder.drop_table()
         Builder.create_table()
 
+def clearWindow():
+    from interaction.commandCenter import destroyMainFrame
+    destroyMainFrame()
+
+
 def recording_checkbox():
     l.warning("Record Function ticked")
     
@@ -102,10 +107,12 @@ def connect():
                 red_text = "black"
                 
                 all_field_string = f'WebSocket: {name} | Host: {host} | Port: {port}'
-                
+                #TODO: Same websocket Dectection
                 result = websockets.select().where(websockets.all_field == all_field_string)
-                
-                if not result:
+                result2 = websockets.select().where((websockets.port == port) & (websockets.password == passw) & (websockets.host == host))
+                l.info(f"WEBSOCKET DB CHECK2 {result2}")
+                # if not all([result, result2]):
+                if not result and not result2:
                     # Verwende get_or_create, um das Objekt zu finden oder zu erstellen
                     entry, created = websockets.get_or_create(
                         host=host, 

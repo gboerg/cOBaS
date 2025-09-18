@@ -8,13 +8,13 @@ import tkinter as tk
 
 
 
-# class confirmActionWindow(ctk.CTkToplevel):
-#     def __init__(self, *args, fg_color = None, **kwargs):
-#         super().__init__(*args, fg_color=fg_color, **kwargs)
-#         window = self.geometry("400x300")
+class confirmActionWindow(ctk.CTkToplevel):
+    def __init__(self, *args, fg_color = None, **kwargs):
+        super().__init__(*args, fg_color=fg_color, **kwargs)
+        window = self.geometry("400x300")
 
-#         self.label = ctk.CTkLabel(self, text="ToplevelWindow")
-#         self.label.pack(padx=20, pady=20)
+        self.label = ctk.CTkLabel(self, text="ToplevelWindow")
+        self.label.pack(padx=20, pady=20)
         
 
 

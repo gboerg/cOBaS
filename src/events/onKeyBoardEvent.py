@@ -19,6 +19,8 @@ def onKeyBoardEnterPress(event: tk.Event, eventtype: Optional[str] = None):
     else:
         getItem = event.widget
         l.info(f"KEYBOARD ENTER EVENT: {getItem}")
+        
+        
         from interaction.commandCenter import reloadBuilderContent 
         reloadBuilderContent()
 
