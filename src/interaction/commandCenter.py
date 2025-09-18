@@ -29,6 +29,7 @@ def dbBuilderEntry(name, location, value: Optional[any]= None, value2: Optional[
         Builder.get_or_create(
             feature = new_string, 
             name  = name,
+            value = value,
             location = location,
             
         )
@@ -38,11 +39,11 @@ def dbBuilderEntry(name, location, value: Optional[any]= None, value2: Optional[
         Builder.get_or_create(
             feature = new_string,
             name  = name,
-
+            value = value,
             location = location,
         )
 
-def generateButtonFrame(name, button_name: str, master, text_name, text_color, fg_color, location: int, db_entry: bool):
+def generateButtonFrame(name, button_name: str, master, text_name, text_color, fg_color, location: int, db_entry: bool, value: Optional[any]= None, value2: Optional[any]= None, value3: Optional[any]= None, value4: Optional[any]= None, value5: Optional[any]= None):
     try:
         # TODO: CREATE GRID "DYNAMIC" ELEMENT
         frame_name = ctk.CTkFrame(master)
@@ -84,29 +85,14 @@ def generateButtonFrame(name, button_name: str, master, text_name, text_color, f
             
   
             #TODO: AMOUNT INSERT LABEL
-            search = f"{location}+{string}" 
-            
-            l.info(f"DATABASE SEARCH STRING : {search}")
-            
-            # ----- WICHTIGER NEUER ABSCHNITT -----
-            # Verwenden von .get(), um den Wert direkt aus der Datenbank zu holen
-            current_amount_value = "0"  # Standardwert, falls nichts gefunden wird
-            try:
-                # Führen Sie die Abfrage aus, um ein einzelnes Ergebnis zu erhalten
-                builder_instance = Builder.get(Builder.feature == search)
+            # # search = f"{location}+{string}" 
+            # if not value:
+            #     value = 0
                 
-                # Extrahieren Sie den Wert aus der Spalte content_kwargs
-                # Dieser Wert muss in einen String umgewandelt werden,
-                # um ihn im Label zu verwenden
-                current_amount_value = str(builder_instance.value)
-                
-            except Builder.DoesNotExist:
-                # Falls kein Datensatz gefunden wird, bleibt der Standardwert "0"
-                l.warning(f"Kein passender Datensatz für '{search}' gefunden.")
+            # getDBVals
+
             
-            # ----- ENDE DES NEUEN ABSCHNITTS -----
-            
-            currentAmount = ctk.CTkLabel(master=frame_name, text=current_amount_value)
+            currentAmount = ctk.CTkLabel(master=frame_name, text=value)
             currentAmount.grid(row=0, column=6, sticky="w", padx=(5,5))
             
                 
@@ -120,12 +106,11 @@ def generateButtonFrame(name, button_name: str, master, text_name, text_color, f
             
             amount_entry.bind("<Return>", onKeyBoardEnterPress)
             
-        getGuiElement(f"{location}current_amount{name}", currentAmount)
         getGuiElement(f"{location}amount_entry{name}", amount_entry)
         getGuiElement(f"{location}+{name}", location_entry)
         
         if db_entry == True:
-            dbBuilderEntry(name=name, location=location)
+            dbBuilderEntry(name=name, location=location, value=value)
         
     except Exception as e:
         l.error(f"Error in generateButtonFrame: {e}")
@@ -304,9 +289,20 @@ def rebuildBuilderContent():
         })
     
     for script in Builder.select():
+        value=0
+        value2=0
+        value3=0
+        value4=0
+        value5=0
         builder_list.append({
             "key": script.feature,
             "location": script.location,
+            "value": script.value,
+            "value2": script.value2,
+            "value3": script.value3,
+            "value4": script.value4,
+            "value5": script.value5
+            
         })
     
     for feature in Features.select():
@@ -326,7 +322,11 @@ def rebuildBuilderContent():
     for builder in sorted_builder_list:
         builder_name = builder["key"]
         location = int(builder["location"])
-        
+        value = builder["value"]
+        value2 = builder["value2"]
+        value3= builder["value3"]
+        value4=builder["value4"]
+        value5=builder["value5"]
 
         
         # Finde alle passenden WebSockets (CONTAINS)
@@ -350,7 +350,12 @@ def rebuildBuilderContent():
                     text_name=builder_name,
                     fg_color=socket["color"],
                     location=location,
-                    db_entry=False
+                    db_entry=False,
+                    value= value,
+                    value2= value2,
+                    value3= value3,
+                    value4= value4,
+                    value5= value5,
                 )
         
         # Finde alle passenden Features (CONTAINS)
@@ -362,8 +367,7 @@ def rebuildBuilderContent():
                     builder_name = builder_name.replace(each, "")
                 # l.info(f"new name {builder_name}")
                 generateButtonFrame(
-                    
-                    
+
                     name=f"{builder_name}",
                     button_name=builder_name,
                     master=mainFrame,
@@ -371,8 +375,14 @@ def rebuildBuilderContent():
                     text_name=builder_name,
                     fg_color=feature["color"],
                     location=location,
-                    db_entry=False
+                    db_entry=False,
+                    value= value,
+                    value2= value2,
+                    value3= value3,
+                    value4= value4,
+                    value5= value5,
                 )
+                
 def checkMainFrame():
     mainFrame = getGuiElement("main_frame")
     mainFrameElements = mainFrame.winfo_children()
@@ -389,12 +399,14 @@ def checkMainFrame():
         combined_name = entry.feature
         feature = entry.name
         location = entry.location
+        value = entry.value
         
         
         currentLocationList.append({
             "key": combined_name,
             "feature": feature,
-            "location": location
+            "location": location,
+            "value": value
         })
         
 
@@ -409,9 +421,17 @@ def checkMainFrame():
                     feature = currentLocationItem["feature"]
                     location = currentLocationItem["location"]
                     locationWidget = getGuiElement(f"{name}")
-
+                    amountWidget = getGuiElement(f"{location}amount_entry{feature}")
+                    
+                    amount_value = 0
                     if not locationWidget:
                         continue
+                    if amountWidget:
+                        amount_value = amountWidget.get()
+                        qry = Builder.update({Builder.value:amount_value}).where(Builder.feature == name)
+                        qry.execute()
+                        l.info(f"[AMOUNT FUNCTION]: CHANGE DECTED: {name} on {location} has now a amount of {amount_value}")
+                        
 
                     location_value = locationWidget.get()
 
@@ -420,6 +440,7 @@ def checkMainFrame():
                         "key": name,
                         "now_location": location,
                         "desired_location": location_value,
+                        "value": amount_value
                     })
 
         except Exception as e:
@@ -433,6 +454,7 @@ def checkMainFrame():
         dbName = dbBuilder["key"]
         dbLocation = dbBuilder["location"]
         raw_name = dbBuilder["feature"]
+        value = dbBuilder["value"]
         
         for inMainFrame in mainFrameItemLocationList:
             db_name_in_main_frame= inMainFrame["key"]
@@ -486,8 +508,10 @@ def checkMainFrame():
         combined_name = compare.feature
         feature = compare.name
         location = compare.location
+        value = compare.value
         
         for key in newFrameDict:
+            
             
             # l.info(f"EACH KEY {key} and EACH COMBINED NAME: {combined_name}")
             
@@ -529,8 +553,8 @@ def checkMainFrame():
 
 
                 dataBaseOverwrite = [
-                    Builder.update({Builder.location: switchingCurrentLocation, Builder.feature: f"{switchingCurrentLocation}+{changingFeatureName}"}).where(Builder.feature == changingDbItemName),
-                    Builder.update({Builder.location: changingCurrentLocation, Builder.feature: f"{changingCurrentLocation}+{switchingFeatureName}"}).where(Builder.feature == switchingDbItemName)
+                    Builder.update({Builder.location: switchingCurrentLocation, Builder.feature: f"{switchingCurrentLocation}+{changingFeatureName}", Builder.value: value}).where(Builder.feature == changingDbItemName),
+                    Builder.update({Builder.location: changingCurrentLocation, Builder.feature: f"{changingCurrentLocation}+{switchingFeatureName}", Builder.value: value}).where(Builder.feature == switchingDbItemName)
                 ]
 
                 for function in dataBaseOverwrite:

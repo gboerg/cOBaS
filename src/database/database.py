@@ -23,8 +23,8 @@ class Features(Model):
 class Builder(Model):
     # id = AutoField()
     feature = CharField(primary_key=True)
-    name  = CharField()
     previous_feature= CharField(null= True)
+    name  = CharField()
     location = IntegerField()
     
     value = CharField(null=True)
